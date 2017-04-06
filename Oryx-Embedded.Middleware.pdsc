@@ -4,7 +4,7 @@
   <vendor>Oryx-Embedded</vendor>
   <name>Middleware</name>
   <description>Middleware Package (CycloneTCP, CycloneSSL and CycloneCrypto)</description>
-  <url>https://github.com/Oryx-Embedded/CMSIS-Pack/</url>
+  <url>https://github.com/Oryx-Embedded/CMSIS-Pack/raw/master/</url>
   <supportContact>support@oryx-embedded.com</supportContact>
   <license>doc\license.txt</license>
   
