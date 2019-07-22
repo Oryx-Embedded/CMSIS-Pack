@@ -10,6 +10,21 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="1.9.4" date="2019-07-19">
+      - Added HTTP/HTTPS client implementation
+      - Support for Modbus/TCP security (TLS layer for Modbus/TCP client and server)
+      - Added LLMNR client and responder implementation
+      - Added support for "Don't Route" IP option
+      - Added driver for STM32MP1 Gigabit Ethernet MAC
+      - Added driver for Renesas S5D9 Ethernet MAC
+      - Support for Realtek RTL8211F Ethernet PHY
+      - Support for KSZ8563 Ethernet switch
+      - Support for Gigabit Ethernet switches (KSZ9477, KSZ9563 and KSZ9893)
+      - Added certificate verification callback (TLS stack)
+      - Base64url encoding/decoding
+      - PEM parsing of PKCS#8 public keys (DSA, ECDSA and EdDSA)
+      - Added example projects for STM32H743I-EVAL board
+    </release>
     <release version="1.9.2" date="2019-04-02">
       - The SMTP and SNTP clients have been redesigned to allow RTOS-less operation
       - Added enhanced features to SMTP client: Rich text (HTML) format, Multipart encoding and emails with attachements
@@ -405,6 +420,17 @@
       <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
     </condition>
+    <condition id="CycloneTCP LLMNR Client Dependencies">
+      <description>CycloneTCP LLMNR Client Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="UDP"/>
+      <require Cclass="CycloneTCP" Cgroup="DNS" Csub="DNS Cache"/>
+    </condition>
+    <condition id="CycloneTCP LLMNR Responder Dependencies">
+      <description>CycloneTCP LLMNR Responder Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="UDP"/>
+    </condition>
     <condition id="CycloneTCP CoAP Client Dependencies">
       <description>CycloneTCP CoAP Client Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
@@ -437,6 +463,17 @@
       <require Cclass="CycloneTCP" Cgroup="TCP"/>
       <require Cclass="CycloneTCP" Cgroup="Socket"/>
       <require Cclass="CycloneSSL" Cgroup="TLS Server"/>
+    </condition>
+    <condition id="CycloneTCP HTTP Client Dependencies">
+      <description>CycloneTCP HTTP Client Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="TCP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+    </condition>
+    <condition id="CycloneTCP HTTP Client TLS Dependencies">
+      <description>CycloneTCP HTTP Client TLS Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="TCP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+      <require Cclass="CycloneSSL" Cgroup="TLS Client"/>
     </condition>
     <condition id="CycloneTCP HTTP Server Dependencies">
       <description>CycloneTCP HTTP Server Dependencies</description>
@@ -599,10 +636,22 @@
       <require Cclass="CycloneTCP" Cgroup="TCP"/>
       <require Cclass="CycloneTCP" Cgroup="Socket"/>
     </condition>
+    <condition id="CycloneTCP Modbus Client TLS Dependencies">
+      <description>CycloneTCP Modbus Client TLS Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="TCP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+      <require Cclass="CycloneSSL" Cgroup="TLS Client"/>
+    </condition>
     <condition id="CycloneTCP Modbus Server Dependencies">
       <description>CycloneTCP Modbus Server Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="TCP"/>
       <require Cclass="CycloneTCP" Cgroup="Socket"/>
+    </condition>
+    <condition id="CycloneTCP Modbus Server TLS Dependencies">
+      <description>CycloneTCP Modbus Server TLS Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="TCP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+      <require Cclass="CycloneSSL" Cgroup="TLS Server"/>
     </condition>
     <condition id="CycloneTCP WebSocket Dependencies">
       <description>CycloneTCP WebSocket Dependencies</description>
@@ -661,11 +710,6 @@
       <description>CycloneSSL ECDSA Dependencies</description>
       <require Cclass="CycloneSSL" Cgroup="Core"/>
       <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="ECDSA"/>
-    </condition>
-    <condition id="CycloneSSL EdDSA Dependencies">
-      <description>CycloneSSL EdDSA Dependencies</description>
-      <require Cclass="CycloneSSL" Cgroup="Core"/>
-      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="EdDSA"/>
     </condition>
     <condition id="CycloneSSL DHE_RSA Dependencies">
       <description>CycloneSSL DHE_RSA Dependencies</description>
@@ -810,6 +854,18 @@
       <require Cclass="CycloneSSL" Cgroup="Core"/>
       <require Cclass="CycloneCrypto" Cgroup="Hash" Csub="SHA-512"/>
     </condition>
+    <condition id="CycloneSSL ffdhe2048 Dependencies">
+      <description>CycloneSSL ffdhe2048 Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+    </condition>
+    <condition id="CycloneSSL ffdhe3072 Dependencies">
+      <description>CycloneSSL ffdhe3072 Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+    </condition>
+    <condition id="CycloneSSL ffdhe4096 Dependencies">
+      <description>CycloneSSL ffdhe4096 Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+    </condition>
     <condition id="CycloneSSL secp160k1 Dependencies">
       <description>CycloneSSL secp160k1 Dependencies</description>
       <require Cclass="CycloneSSL" Cgroup="Core"/>
@@ -880,15 +936,25 @@
       <require Cclass="CycloneSSL" Cgroup="Core"/>
       <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
     </condition>
-    <condition id="CycloneSSL Curve25519 Dependencies">
-      <description>CycloneSSL Curve25519 Dependencies</description>
+    <condition id="CycloneSSL x25519 Dependencies">
+      <description>CycloneSSL x25519 Dependencies</description>
       <require Cclass="CycloneSSL" Cgroup="Core"/>
-      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="X25519"/>
     </condition>
-    <condition id="CycloneSSL Curve448 Dependencies">
-      <description>CycloneSSL Curve448 Dependencies</description>
+    <condition id="CycloneSSL x448 Dependencies">
+      <description>CycloneSSL x448 Dependencies</description>
       <require Cclass="CycloneSSL" Cgroup="Core"/>
-      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="X448"/>
+    </condition>
+    <condition id="CycloneSSL Ed25519 Dependencies">
+      <description>CycloneSSL Ed25519 Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Ed25519"/>
+    </condition>
+    <condition id="CycloneSSL Ed448 Dependencies">
+      <description>CycloneSSL Ed448 Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Ed448"/>
     </condition>
     
     <!-- CycloneCrypto Dependencies -->
@@ -1005,10 +1071,21 @@
       <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
       <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="ASN.1"/>
     </condition>
-    <condition id="CycloneCrypto EdDSA Dependencies">
-      <description>CycloneCrypto EdDSA Dependencies</description>
+    <condition id="CycloneCrypto X25519 Dependencies">
+      <description>CycloneCrypto X25519 Dependencies</description>
       <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
-      <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="ASN.1"/>
+    </condition>
+    <condition id="CycloneCrypto X448 Dependencies">
+      <description>CycloneCrypto X448 Dependencies</description>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneCrypto Ed25519 Dependencies">
+      <description>CycloneCrypto Ed25519 Dependencies</description>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneCrypto Ed448 Dependencies">
+      <description>CycloneCrypto Ed448 Dependencies</description>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="Core"/>
     </condition>
     <condition id="CycloneCrypto DSA Dependencies">
       <description>CycloneCrypto DSA Dependencies</description>
@@ -1050,6 +1127,7 @@
     <description Cclass="CycloneTCP" Cgroup="mDNS">mDNS Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="DNS-SD">DNS-SD Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="NetBIOS">NetBIOS Protocol</description>
+    <description Cclass="CycloneTCP" Cgroup="LLMNR">LLMNR Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="CoAP">CoAP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="FTP">FTP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="MQTT">MQTT Protocol</description>
@@ -1077,7 +1155,7 @@
     <description Cclass="CycloneSSL" Cgroup="AEAD">Authenticated Encryption with Associated Data</description>
     <description Cclass="CycloneSSL" Cgroup="Cipher">Encryption Algorithms</description>
     <description Cclass="CycloneSSL" Cgroup="Hash">Hash Functions</description>
-    <description Cclass="CycloneSSL" Cgroup="ECC">Elliptic Curves</description>
+    <description Cclass="CycloneSSL" Cgroup="Groups">Supported Groups</description>
     
     <description Cclass="CycloneCrypto">Cryptographic Library</description>
     <description Cclass="CycloneCrypto" Cgroup="Hash">Hash Functions</description>
@@ -1099,7 +1177,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="1.9.2">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="1.9.4">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1255,7 +1333,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="1.9.2">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="1.9.4">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -1629,6 +1707,38 @@
         </files>
       </component>
       
+      <component Cgroup="LLMNR" Csub="LLMNR Client" condition="CycloneTCP LLMNR Client Dependencies">
+        <description>LLMNR Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_LLMNR_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/llmnr/llmnr_client.h"/>
+          <file category="header" name="cyclone_tcp/llmnr/llmnr_common.h"/>
+          
+          <file category="source" name="cyclone_tcp/llmnr/llmnr_client.c"/>
+          <file category="source" name="cyclone_tcp/llmnr/llmnr_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="LLMNR" Csub="LLMNR Responder" condition="CycloneTCP LLMNR Responder Dependencies">
+        <description>LLMNR Responder</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_LLMNR_RESPONDER
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/llmnr/llmnr_responder.h"/>
+          <file category="header" name="cyclone_tcp/llmnr/llmnr_common.h"/>
+          
+          <file category="source" name="cyclone_tcp/llmnr/llmnr_responder.c"/>
+          <file category="source" name="cyclone_tcp/llmnr/llmnr_common.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="CoAP" Csub="CoAP Client" Cvariant="UDP" isDefaultVariant="true" condition="CycloneTCP CoAP Client Dependencies">
         <description>Non-Secure CoAP Client</description>
         <RTE_Components_h>
@@ -1767,6 +1877,51 @@
           <file category="source" name="cyclone_tcp/ftp/ftp_server_events.c"/>
           <file category="source" name="cyclone_tcp/ftp/ftp_server_commands.c"/>
           <file category="source" name="cyclone_tcp/ftp/ftp_server_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="HTTP" Csub="HTTP Client" Cvariant="TCP" isDefaultVariant="true" condition="CycloneTCP HTTP Client Dependencies">
+        <description>Non-Secure HTTP Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_HTTP_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/http/http_client.h"/>
+          <file category="header" name="cyclone_tcp/http/http_client_auth.h"/>
+          <file category="header" name="cyclone_tcp/http/http_client_transport.h"/>
+          <file category="header" name="cyclone_tcp/http/http_client_misc.h"/>
+          <file category="header" name="cyclone_tcp/http/http_common.h"/>
+          
+          <file category="source" name="cyclone_tcp/http/http_client.c"/>
+          <file category="source" name="cyclone_tcp/http/http_client_auth.c"/>
+          <file category="source" name="cyclone_tcp/http/http_client_transport.c"/>
+          <file category="source" name="cyclone_tcp/http/http_client_misc.c"/>
+          <file category="source" name="cyclone_tcp/http/http_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="HTTP" Csub="HTTP Client" Cvariant="TLS" condition="CycloneTCP HTTP Client TLS Dependencies">
+        <description>Secure HTTP Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_HTTP_CLIENT
+          #define RTE_CYCLONE_TCP_HTTP_CLIENT_TLS
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/http/http_client.h"/>
+          <file category="header" name="cyclone_tcp/http/http_client_auth.h"/>
+          <file category="header" name="cyclone_tcp/http/http_client_transport.h"/>
+          <file category="header" name="cyclone_tcp/http/http_client_misc.h"/>
+          <file category="header" name="cyclone_tcp/http/http_common.h"/>
+          
+          <file category="source" name="cyclone_tcp/http/http_client.c"/>
+          <file category="source" name="cyclone_tcp/http/http_client_auth.c"/>
+          <file category="source" name="cyclone_tcp/http/http_client_transport.c"/>
+          <file category="source" name="cyclone_tcp/http/http_client_misc.c"/>
+          <file category="source" name="cyclone_tcp/http/http_common.c"/>
         </files>
       </component>
       
@@ -2262,8 +2417,8 @@
         </files>
       </component>
       
-      <component Cgroup="Modbus" Csub="Modbus Client" condition="CycloneTCP Modbus Client Dependencies">
-        <description>Modbus/TCP Client</description>
+      <component Cgroup="Modbus" Csub="Modbus Client" Cvariant="TCP" isDefaultVariant="true" condition="CycloneTCP Modbus Client Dependencies">
+        <description>Non-Secure Modbus/TCP Client</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_TCP_MODBUS_CLIENT
         </RTE_Components_h>
@@ -2272,19 +2427,45 @@
           
           <file category="header" name="cyclone_tcp/modbus/modbus_client.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_client_pdu.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_client_transport.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_client_misc.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_common.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_debug.h"/>
           
           <file category="source" name="cyclone_tcp/modbus/modbus_client.c"/>
           <file category="source" name="cyclone_tcp/modbus/modbus_client_pdu.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_client_transport.c"/>
           <file category="source" name="cyclone_tcp/modbus/modbus_client_misc.c"/>
           <file category="source" name="cyclone_tcp/modbus/modbus_debug.c"/>
         </files>
       </component>
       
-      <component Cgroup="Modbus" Csub="Modbus Server" condition="CycloneTCP Modbus Server Dependencies">
-        <description>Modbus/TCP Server</description>
+      <component Cgroup="Modbus" Csub="Modbus Client" Cvariant="TLS" condition="CycloneTCP Modbus Client TLS Dependencies">
+        <description>Secure Modbus/TCP Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_MODBUS_CLIENT
+          #define RTE_CYCLONE_TCP_MODBUS_CLIENT_TLS
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/modbus/modbus_client.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_client_pdu.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_client_transport.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_client_misc.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_common.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_debug.h"/>
+          
+          <file category="source" name="cyclone_tcp/modbus/modbus_client.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_client_pdu.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_client_transport.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_client_misc.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_debug.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Modbus" Csub="Modbus Server" Cvariant="TCP" isDefaultVariant="true" condition="CycloneTCP Modbus Server Dependencies">
+        <description>Non-Secure Modbus/TCP Server</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_TCP_MODBUS_SERVER
         </RTE_Components_h>
@@ -2293,12 +2474,40 @@
           
           <file category="header" name="cyclone_tcp/modbus/modbus_server.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_server_pdu.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_server_transport.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_server_misc.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_common.h"/>
           <file category="header" name="cyclone_tcp/modbus/modbus_debug.h"/>
           
           <file category="source" name="cyclone_tcp/modbus/modbus_server.c"/>
           <file category="source" name="cyclone_tcp/modbus/modbus_server_pdu.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_server_transport.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_server_misc.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_debug.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Modbus" Csub="Modbus Server" Cvariant="TLS" condition="CycloneTCP Modbus Server TLS Dependencies">
+        <description>Secure Modbus/TCP Server</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_MODBUS_SERVER
+          #define RTE_CYCLONE_TCP_MODBUS_SERVER_TLS
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/modbus/modbus_server.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_server_pdu.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_server_transport.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_server_security.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_server_misc.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_common.h"/>
+          <file category="header" name="cyclone_tcp/modbus/modbus_debug.h"/>
+          
+          <file category="source" name="cyclone_tcp/modbus/modbus_server.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_server_pdu.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_server_transport.c"/>
+          <file category="source" name="cyclone_tcp/modbus/modbus_server_security.c"/>
           <file category="source" name="cyclone_tcp/modbus/modbus_server_misc.c"/>
           <file category="source" name="cyclone_tcp/modbus/modbus_debug.c"/>
         </files>
@@ -2680,6 +2889,15 @@
         </files>
       </component>      
       
+      <component Cgroup="Drivers (MAC)" Csub="S5D9" condition="CycloneTCP Core Dependencies">
+        <description>Renesas Synergy S5D9 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/s5d9_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/s5d9_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="S7G2" condition="CycloneTCP Core Dependencies">
         <description>Renesas Synergy S7G2 Ethernet MAC controller</description>
         <files>
@@ -2707,44 +2925,35 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="STM32F107" condition="CycloneTCP Core Dependencies">
-        <description>ST STM32F107 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="STM32F1xx" condition="CycloneTCP Core Dependencies">
+        <description>ST STM32F1 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/stm32f107_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/stm32f107_eth_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/stm32f1xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/stm32f1xx_eth_driver.c"/>
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="STM32F2x7" condition="CycloneTCP Core Dependencies">
-        <description>ST STM32F2x7 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="STM32F2xx" condition="CycloneTCP Core Dependencies">
+        <description>ST STM32F2 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/stm32f2x7_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/stm32f2x7_eth_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/stm32f2xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/stm32f2xx_eth_driver.c"/>
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="STM32F4x7" condition="CycloneTCP Core Dependencies">
-        <description>ST STM32F4x7 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="STM32F4xx" condition="CycloneTCP Core Dependencies">
+        <description>ST STM32F4 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/stm32f4x7_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/stm32f4x7_eth_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (MAC)" Csub="STM32F4x9" condition="CycloneTCP Core Dependencies">
-        <description>ST STM32F4x9 Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/stm32f4x9_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/stm32f4x9_eth_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/stm32f4xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/stm32f4xx_eth_driver.c"/>
         </files>
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="STM32F7xx" condition="CycloneTCP Core Dependencies">
-        <description>ST STM32F7xx Ethernet MAC controller</description>
+        <description>ST STM32F7 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/stm32f7xx_eth_driver.h"/>
@@ -2753,11 +2962,20 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="STM32H7xx" condition="CycloneTCP Core Dependencies">
-        <description>ST STM32H7xx Ethernet MAC controller</description>
+        <description>ST STM32H7 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/stm32h7xx_eth_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/mac/stm32h7xx_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="STM32MP1xx" condition="CycloneTCP Core Dependencies">
+        <description>ST STM32MP1 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/stm32mp1xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/stm32mp1xx_eth_driver.c"/>
         </files>
       </component>
       
@@ -2826,7 +3044,7 @@
       
       <!-- PHY Drivers -->
       <component Cgroup="Drivers (PHY)" Csub="AR8031" condition="CycloneTCP Core Dependencies">
-        <description>Atheros AR8031 Ethernet PHY transceiver</description>
+        <description>Atheros AR8031 Gigabit Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ar8031_driver.h"/>
@@ -2835,7 +3053,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="AR8035" condition="CycloneTCP Core Dependencies">
-        <description>Atheros AR8035 Ethernet PHY transceiver</description>
+        <description>Atheros AR8035 Gigabit Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ar8035_driver.h"/>
@@ -2858,6 +3076,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ip101_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/phy/ip101_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="MV88E1512" condition="CycloneTCP Core Dependencies">
+        <description>Marvell 88E1512 Gigabit Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/mv88e1512_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/mv88e1512_driver.c"/>
         </files>
       </component>
       
@@ -2925,7 +3152,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ9031" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ9031 Ethernet PHY transceiver</description>
+        <description>Micrel KSZ9031 Gigabit Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz9031_driver.h"/>
@@ -2933,12 +3160,21 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (PHY)" Csub="RTL8211" condition="CycloneTCP Core Dependencies">
-        <description>Realtek RTL8211 Ethernet PHY transceiver</description>
+      <component Cgroup="Drivers (PHY)" Csub="RTL8211E" condition="CycloneTCP Core Dependencies">
+        <description>Realtek RTL8211E Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/rtl8211_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/rtl8211_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/rtl8211e_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/rtl8211e_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="RTL8211F" condition="CycloneTCP Core Dependencies">
+        <description>Realtek RTL8211F Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/rtl8211f_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/rtl8211f_driver.c"/>
         </files>
       </component>
       
@@ -3050,6 +3286,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Switch)" Csub="KSZ8563" condition="CycloneTCP Core Dependencies">
+        <description>Micrel KSZ8563 Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz8563_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz8563_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Switch)" Csub="KSZ8794" condition="CycloneTCP Core Dependencies">
         <description>Micrel KSZ8794 Ethernet switch</description>
         <files>
@@ -3083,6 +3328,33 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8895_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/switch/ksz8895_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ9477" condition="CycloneTCP Core Dependencies">
+        <description>Micrel KSZ9477 Gigabit Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz9477_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz9477_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ9563" condition="CycloneTCP Core Dependencies">
+        <description>Micrel KSZ9563 Gigabit Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz9563_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz9563_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ9893" condition="CycloneTCP Core Dependencies">
+        <description>Micrel KSZ9893 Gigabit Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz9893_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz9893_driver.c"/>
         </files>
       </component>
       
@@ -3314,7 +3586,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="1.9.2">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="1.9.4">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -3337,7 +3609,6 @@
           <file category="header" name="cyclone_ssl/tls_transcript_hash.h"/>
           <file category="header" name="cyclone_ssl/tls_cache.h"/>
           <file category="header" name="cyclone_ssl/tls_ticket.h"/>
-          <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
           <file category="header" name="cyclone_ssl/tls_record.h"/>
           <file category="header" name="cyclone_ssl/tls_record_encryption.h"/>
           <file category="header" name="cyclone_ssl/tls_record_decryption.h"/>
@@ -3358,7 +3629,6 @@
           <file category="source" name="cyclone_ssl/tls_transcript_hash.c"/>
           <file category="source" name="cyclone_ssl/tls_cache.c"/>
           <file category="source" name="cyclone_ssl/tls_ticket.c"/>
-          <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
           <file category="source" name="cyclone_ssl/tls_record.c"/>
           <file category="source" name="cyclone_ssl/tls_record_encryption.c"/>
           <file category="source" name="cyclone_ssl/tls_record_decryption.c"/>
@@ -3601,10 +3871,19 @@
         </files>
       </component>
       
-      <component Cgroup="Signature" Csub="EdDSA" condition="CycloneSSL EdDSA Dependencies">
-        <description>EdDSA Signature</description>
+      <component Cgroup="Signature" Csub="Ed25519" condition="CycloneSSL Ed25519 Dependencies">
+        <description>Ed25519 Signature</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_SSL_EDDSA_SIGN
+          #define RTE_CYCLONE_SSL_ED25519
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Signature" Csub="Ed448" condition="CycloneSSL Ed448 Dependencies">
+        <description>Ed448 Signature</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_ED448
         </RTE_Components_h>
         <files>
         </files>
@@ -3773,7 +4052,43 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp160k1" condition="CycloneSSL secp160k1 Dependencies">
+      <component Cgroup="Groups" Csub="ffdhe2048" condition="CycloneSSL ffdhe2048 Dependencies">
+        <description>ffdhe2048 Finite Field DH Parameters</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_FFDHE2048
+        </RTE_Components_h>
+        <files>
+        <file category="include" name="cyclone_ssl/"/>
+        <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
+        <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Groups" Csub="ffdhe3072" condition="CycloneSSL ffdhe3072 Dependencies">
+        <description>ffdhe3072 Finite Field DH Parameters</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_FFDHE3072
+        </RTE_Components_h>
+        <files>
+        <file category="include" name="cyclone_ssl/"/>
+        <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
+        <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Groups" Csub="ffdhe4096" condition="CycloneSSL ffdhe4096 Dependencies">
+        <description>ffdhe4096 Finite Field DH Parameters</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_FFDHE4096
+        </RTE_Components_h>
+        <files>
+        <file category="include" name="cyclone_ssl/"/>
+        <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
+        <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
+        </files>
+      </component> 
+      
+      <component Cgroup="Groups" Csub="secp160k1" condition="CycloneSSL secp160k1 Dependencies">
         <description>secp160k1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP160K1
@@ -3782,7 +4097,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp160r1" condition="CycloneSSL secp160r1 Dependencies">
+      <component Cgroup="Groups" Csub="secp160r1" condition="CycloneSSL secp160r1 Dependencies">
         <description>secp160r1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP160R1
@@ -3791,7 +4106,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp160r2" condition="CycloneSSL secp160r2 Dependencies">
+      <component Cgroup="Groups" Csub="secp160r2" condition="CycloneSSL secp160r2 Dependencies">
         <description>secp160r2 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP160R2
@@ -3800,7 +4115,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp192k1" condition="CycloneSSL secp192k1 Dependencies">
+      <component Cgroup="Groups" Csub="secp192k1" condition="CycloneSSL secp192k1 Dependencies">
         <description>secp192k1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP192K1
@@ -3809,7 +4124,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp192r1" condition="CycloneSSL secp192r1 Dependencies">
+      <component Cgroup="Groups" Csub="secp192r1" condition="CycloneSSL secp192r1 Dependencies">
         <description>secp192r1 Elliptic Curve (NIST P-192)</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP192R1
@@ -3818,7 +4133,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp224k1" condition="CycloneSSL secp224k1 Dependencies">
+      <component Cgroup="Groups" Csub="secp224k1" condition="CycloneSSL secp224k1 Dependencies">
         <description>secp224k1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP224K1
@@ -3827,7 +4142,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp224r1" condition="CycloneSSL secp224r1 Dependencies">
+      <component Cgroup="Groups" Csub="secp224r1" condition="CycloneSSL secp224r1 Dependencies">
         <description>secp224r1 Elliptic Curve (NIST P-224)</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP224R1
@@ -3836,7 +4151,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp256k1" condition="CycloneSSL secp256k1 Dependencies">
+      <component Cgroup="Groups" Csub="secp256k1" condition="CycloneSSL secp256k1 Dependencies">
         <description>secp256k1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP256K1
@@ -3845,7 +4160,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp256r1" condition="CycloneSSL secp256r1 Dependencies">
+      <component Cgroup="Groups" Csub="secp256r1" condition="CycloneSSL secp256r1 Dependencies">
         <description>secp256r1 Elliptic Curve (NIST P-256)</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP256R1
@@ -3854,7 +4169,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp384r1" condition="CycloneSSL secp384r1 Dependencies">
+      <component Cgroup="Groups" Csub="secp384r1" condition="CycloneSSL secp384r1 Dependencies">
         <description>secp384r1 Elliptic Curve (NIST P-384)</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP384R1
@@ -3863,7 +4178,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="secp521r1" condition="CycloneSSL secp521r1 Dependencies">
+      <component Cgroup="Groups" Csub="secp521r1" condition="CycloneSSL secp521r1 Dependencies">
         <description>secp521r1 Elliptic Curve (NIST P-521)</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_SECP521R1
@@ -3872,7 +4187,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="brainpoolP256r1" condition="CycloneSSL brainpoolP256r1 Dependencies">
+      <component Cgroup="Groups" Csub="brainpoolP256r1" condition="CycloneSSL brainpoolP256r1 Dependencies">
         <description>brainpoolP256r1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_BRAINPOOLP256R1
@@ -3881,7 +4196,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="brainpoolP384r1" condition="CycloneSSL brainpoolP384r1 Dependencies">
+      <component Cgroup="Groups" Csub="brainpoolP384r1" condition="CycloneSSL brainpoolP384r1 Dependencies">
         <description>brainpoolP384r1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_BRAINPOOLP384R1
@@ -3890,7 +4205,7 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="brainpoolP512r1" condition="CycloneSSL brainpoolP512r1 Dependencies">
+      <component Cgroup="Groups" Csub="brainpoolP512r1" condition="CycloneSSL brainpoolP512r1 Dependencies">
         <description>brainpoolP512r1 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_BRAINPOOLP512R1
@@ -3899,8 +4214,8 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="Curve25519" condition="CycloneSSL Curve25519 Dependencies">
-        <description>Curve25519 Elliptic Curve</description>
+      <component Cgroup="Groups" Csub="x25519" condition="CycloneSSL x25519 Dependencies">
+        <description>x25519 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_X25519
         </RTE_Components_h>
@@ -3908,8 +4223,8 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="Curve448" condition="CycloneSSL Curve448 Dependencies">
-        <description>Curve448 Elliptic Curve</description>
+      <component Cgroup="Groups" Csub="x448" condition="CycloneSSL x448 Dependencies">
+        <description>x448 Elliptic Curve</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_X448
         </RTE_Components_h>
@@ -3919,7 +4234,7 @@
     </bundle>
     
     <!-- CycloneCrypto -->
-    <bundle Cbundle="CycloneCrypto" Cclass="CycloneCrypto" Cversion="1.9.2">
+    <bundle Cbundle="CycloneCrypto" Cclass="CycloneCrypto" Cversion="1.9.4">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -4678,17 +4993,9 @@
           
           <file category="header" name="cyclone_crypto/ecc/ec.h"/>
           <file category="header" name="cyclone_crypto/ecc/ec_curves.h"/>
-          <file category="header" name="cyclone_crypto/ecc/curve25519.h"/>
-          <file category="header" name="cyclone_crypto/ecc/curve448.h"/>
-          <file category="header" name="cyclone_crypto/ecc/x25519.h"/>
-          <file category="header" name="cyclone_crypto/ecc/x448.h"/>
           
           <file category="source" name="cyclone_crypto/ecc/ec.c"/>
           <file category="source" name="cyclone_crypto/ecc/ec_curves.c"/>
-          <file category="source" name="cyclone_crypto/ecc/curve25519.c"/>
-          <file category="source" name="cyclone_crypto/ecc/curve448.c"/>
-          <file category="source" name="cyclone_crypto/ecc/x25519.c"/>
-          <file category="source" name="cyclone_crypto/ecc/x448.c"/>
         </files>
       </component>
       
@@ -4716,21 +5023,71 @@
         </files>
       </component>
       
-      <component Cgroup="ECC" Csub="EdDSA" condition="CycloneCrypto EdDSA Dependencies">
-        <description>Edwards-Curve DSA</description>
+      <component Cgroup="ECC" Csub="X25519" condition="CycloneCrypto X25519 Dependencies">
+        <description>X25519 Function</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_CRYPTO_EDDSA
+          #define RTE_CYCLONE_CRYPTO_X25519
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
-          <file category="header" name="cyclone_crypto/ecc/ecdsa.h"/>
-          <file category="header" name="cyclone_crypto/ecc/ed25519.h"/>
-          <file category="header" name="cyclone_crypto/ecc/ed448.h"/>
+          <file category="header" name="cyclone_crypto/ecc/x25519.h"/>
+          <file category="header" name="cyclone_crypto/ecc/curve25519.h"/>
           
-          <file category="source" name="cyclone_crypto/ecc/ecdsa.c"/>
+          <file category="source" name="cyclone_crypto/ecc/x25519.c"/>
+          <file category="source" name="cyclone_crypto/ecc/curve25519.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="ECC" Csub="X448" condition="CycloneCrypto X448 Dependencies">
+        <description>X448 Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X448
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/ecc/x448.h"/>
+          <file category="header" name="cyclone_crypto/ecc/curve448.h"/>
+          
+          <file category="source" name="cyclone_crypto/ecc/x448.c"/>
+          <file category="source" name="cyclone_crypto/ecc/curve448.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="ECC" Csub="Ed25519" condition="CycloneCrypto Ed25519 Dependencies">
+        <description>Ed25519 Signature Algorithm</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_ED25519
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/ecc/eddsa.h"/>
+          <file category="header" name="cyclone_crypto/ecc/ed25519.h"/>
+          <file category="header" name="cyclone_crypto/ecc/curve25519.h"/>
+          
+          <file category="source" name="cyclone_crypto/ecc/eddsa.c"/>
           <file category="source" name="cyclone_crypto/ecc/ed25519.c"/>
+          <file category="source" name="cyclone_crypto/ecc/curve25519.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="ECC" Csub="Ed448" condition="CycloneCrypto Ed448 Dependencies">
+        <description>Ed448 Signature Algorithm</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_ED448
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/ecc/eddsa.h"/>
+          <file category="header" name="cyclone_crypto/ecc/ed448.h"/>
+          <file category="header" name="cyclone_crypto/ecc/curve448.h"/>
+          
+          <file category="source" name="cyclone_crypto/ecc/eddsa.c"/>
           <file category="source" name="cyclone_crypto/ecc/ed448.c"/>
+          <file category="source" name="cyclone_crypto/ecc/curve448.c"/>
         </files>
       </component>
       
@@ -4770,6 +5127,18 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/encoding/base64.h"/>
           <file category="source" name="cyclone_crypto/encoding/base64.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Encoding" Csub="Base64url" condition="CycloneCrypto Core Dependencies">
+        <description>Base64url Encoding/Decoding</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_BASE64URL
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/encoding/base64url.h"/>
+          <file category="source" name="cyclone_crypto/encoding/base64url.c"/>
         </files>
       </component>
       
@@ -5086,12 +5455,12 @@
       </attributes>
     </example>
     
-    <!-- SSL Client Demo (MCBSTM32F400) -->
-    <example name="CycloneSSL SSL Client Demo" doc="abstract.txt" folder="demo/mcbstm32f400/ssl_client_demo">
-      <description>SSL client demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
+    <!-- TLS Client Demo (MCBSTM32F400) -->
+    <example name="CycloneSSL TLS Client Demo" doc="abstract.txt" folder="demo/mcbstm32f400/tls_client_demo">
+      <description>TLS client demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
       <board name="MCBSTM32F400" vendor="Keil"/>
       <project>
-        <environment name="uv" load="ssl_client_demo.uvprojx"/>
+        <environment name="uv" load="tls_client_demo.uvprojx"/>
       </project>
       <attributes>
         <component Cclass="CMSIS" Cgroup="CORE"/>
@@ -5106,12 +5475,12 @@
       </attributes>
     </example>
     
-    <!-- SSL Server Demo (MCBSTM32F400) -->
-    <example name="CycloneSSL SSL Server Demo" doc="abstract.txt" folder="demo/mcbstm32f400/ssl_server_demo">
-      <description>SSL server demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
+    <!-- TLS Server Demo (MCBSTM32F400) -->
+    <example name="CycloneSSL TLS Server Demo" doc="abstract.txt" folder="demo/mcbstm32f400/tls_server_demo">
+      <description>TLS server demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
       <board name="MCBSTM32F400" vendor="Keil"/>
       <project>
-        <environment name="uv" load="ssl_server_demo.uvprojx"/>
+        <environment name="uv" load="tls_server_demo.uvprojx"/>
       </project>
       <attributes>
         <component Cclass="CMSIS" Cgroup="CORE"/>
@@ -5296,6 +5665,30 @@
       </attributes>
     </example>
     
+    <!-- FTPS Server Demo (STM32439I-EVAL) -->
+    <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32439i_eval/ftps_server_demo">
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, FatFs and CMSIS-RTOS)</description>
+      <board name="STM32439I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ftps_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>FTPS</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
+        <keyword>FatFs</keyword>
+      </attributes>
+    </example>
+    
     <!-- HTTP Server Demo (STM32439I-EVAL) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/stm32439i_eval/http_server_demo">
       <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
@@ -5385,12 +5778,12 @@
       </attributes>
     </example>
     
-    <!-- SSL Client Demo (STM32439I-EVAL) -->
-    <example name="CycloneSSL SSL Client Demo" doc="abstract.txt" folder="demo/stm32439i_eval/ssl_client_demo">
-      <description>SSL client demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
+    <!-- TLS Client Demo (STM32439I-EVAL) -->
+    <example name="CycloneSSL TLS Client Demo" doc="abstract.txt" folder="demo/stm32439i_eval/tls_client_demo">
+      <description>TLS client demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
       <board name="STM32439I-EVAL" vendor="STMicroelectronics"/>
       <project>
-        <environment name="uv" load="ssl_client_demo.uvprojx"/>
+        <environment name="uv" load="tls_client_demo.uvprojx"/>
       </project>
       <attributes>
         <component Cclass="CMSIS" Cgroup="CORE"/>
@@ -5405,12 +5798,12 @@
       </attributes>
     </example>
     
-    <!-- SSL Server Demo (STM32439I-EVAL) -->
-    <example name="CycloneSSL SSL Server Demo" doc="abstract.txt" folder="demo/stm32439i_eval/ssl_server_demo">
-      <description>SSL server demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
+    <!-- TLS Server Demo (STM32439I-EVAL) -->
+    <example name="CycloneSSL TLS Server Demo" doc="abstract.txt" folder="demo/stm32439i_eval/tls_server_demo">
+      <description>TLS server demo (CycloneSSL, CMSIS-RTOS and Keil TCP/IP Networking Suite)</description>
       <board name="STM32439I-EVAL" vendor="STMicroelectronics"/>
       <project>
-        <environment name="uv" load="ssl_server_demo.uvprojx"/>
+        <environment name="uv" load="tls_server_demo.uvprojx"/>
       </project>
       <attributes>
         <component Cclass="CMSIS" Cgroup="CORE"/>
@@ -5576,6 +5969,50 @@
       </attributes>
     </example>
     
+    <!-- FTP Server Demo (STM32F769I-Discovery) -->
+    <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/ftp_server_demo">
+      <description>FTP server demo (CycloneTCP, FatFs and CMSIS-RTOS)</description>
+      <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ftp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>Server</keyword>
+        <keyword>FatFs</keyword>
+      </attributes>
+    </example>
+    
+    <!-- FTPS Server Demo (STM32F769I-Discovery) -->
+    <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/ftps_server_demo">
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, FatFs and CMSIS-RTOS)</description>
+      <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ftps_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>FTPS</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
+        <keyword>FatFs</keyword>
+      </attributes>
+    </example>
+    
     <!-- HTTP Server Demo (STM32F769I-Discovery) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/http_server_demo">
       <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
@@ -5594,6 +6031,30 @@
         <keyword>HTTP</keyword>
         <keyword>Server</keyword>
         <keyword>Web Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTPS Server Demo (STM32F769I-Discovery) -->
+    <example name="CycloneTCP HTTPS Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/https_server_demo">
+      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS)</description>
+      <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="https_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
       </attributes>
     </example>
     
@@ -5638,6 +6099,245 @@
       </attributes>
     </example>
     
+    <!-- FTP Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP FTP Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/ftp_client_demo">
+      <description>FTP client demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ftp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- FTPS Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP FTPS Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/ftps_client_demo">
+      <description>FTPS client demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ftps_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>FTPS</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTP Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP HTTP Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/http_client_demo">
+      <description>HTTP client demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="http_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTPS Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP HTTPS Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/https_client_demo">
+      <description>HTTPS client demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="https_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTP Server Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/http_server_demo">
+      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="http_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>Server</keyword>
+        <keyword>Web Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTPS Server Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP HTTPS Server Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/https_server_demo">
+      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="https_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SMTP Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP SMTP Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/smtp_client_demo">
+      <description>SMTP client with SSL support (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="smtp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SMTP</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SNMP Agent Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP SNMP Agent Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/snmp_agent_demo">
+      <description>SNMP Agent demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="snmp_agent_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>Server</keyword>
+        <keyword>Web Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SNTP Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP SNTP Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/sntp_client_demo">
+      <description>SNTP client demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="sntp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SNTP</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- WebSocket Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP WebSocket Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/web_socket_client_demo">
+      <description>WebSocket client demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="web_socket_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>WebSocket</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+      </attributes>
+    </example>
+    
+    <!-- VLAN HTTP Server Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP VLAN HTTP Server Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/vlan_http_server_demo">
+      <description>VLAN HTTP server demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="vlan_http_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+	<keyword>VLAN</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>Server</keyword>
+        <keyword>Web Server</keyword>
+      </attributes>
+    </example>
+    
     <!-- HTTP Server Demo (EK-TM4C1294XL) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/ek_tm4c1294xl/http_server_demo">
       <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
@@ -5656,6 +6356,30 @@
         <keyword>HTTP</keyword>
         <keyword>Server</keyword>
         <keyword>Web Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTPS Server Demo (EK-TM4C1294XL) -->
+    <example name="CycloneTCP HTTPS Server Demo" doc="abstract.txt" folder="demo/ek_tm4c1294xl/https_server_demo">
+      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS)</description>
+      <board name="EK-TM4C1294XL" vendor="Texas Instruments"/>
+      <project>
+        <environment name="uv" load="https_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>SSL</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
       </attributes>
     </example>
     
