@@ -10,6 +10,21 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="1.9.6" date="2019-11-27">
+      - Added TLS support for FTP server (explicit and implicit TLS modes ares supported)
+      - Support for IP_MULTICAST_TTL option (BSD sockets)
+      - Added driver for NXP S32K148 Ethernet MAC
+      - Added driver for Nuvoton M487 Ethernet MAC
+      - Added driver for GigaDevice GD32F307 Ethernet MAC
+      - Support for 100Base-T1 PHYs (TI DP83TC811 and NXP TJA1100/TJA1101)
+      - Support for KSZ8864 Ethernet switch
+      - Blowfish encryption algorithm
+      - bcrypt and scrypt password hashing function
+      - X.509 certification creation
+      - X.509 CRL parsing and validation
+      - CSR (Certificate Signing Request) parsing and creation
+      - RSA key pair generation (supports SAMD51 and SAME54 PUKCC accelerator)
+    </release>
     <release version="1.9.4" date="2019-07-19">
       - Added HTTP/HTTPS client implementation
       - Support for Modbus/TCP security (TLS layer for Modbus/TCP client and server)
@@ -688,9 +703,10 @@
       <require Cclass="CycloneCrypto" Cgroup="MAC" Csub="HMAC"/>
       <require Cclass="CycloneCrypto" Cgroup="KDF" Csub="HKDF"/>
       <require Cclass="CycloneCrypto" Cgroup="MPI" Csub="Core"/>
-      <require Cclass="CycloneCrypto" Cgroup="Certificate" Csub="X.509 Cert Parse"/>
-      <require Cclass="CycloneCrypto" Cgroup="Certificate" Csub="X.509 Cert Validate"/>
-      <require Cclass="CycloneCrypto" Cgroup="Certificate" Csub="PEM Import"/>
+      <require Cclass="CycloneCrypto" Cgroup="PKIX" Csub="Key Parsing"/>
+      <require Cclass="CycloneCrypto" Cgroup="PKIX" Csub="Certificate Parsing"/>
+      <require Cclass="CycloneCrypto" Cgroup="PKIX" Csub="Certificate Validation"/>
+      <require Cclass="CycloneCrypto" Cgroup="PKIX" Csub="PEM File Import"/>
     </condition>
     <condition id="CycloneSSL Core Dependencies">
       <description>CycloneSSL Core Dependencies</description>
@@ -761,6 +777,26 @@
     </condition>
     <condition id="CycloneSSL ECDHE_PSK Dependencies">
       <description>CycloneSSL ECDHE_PSK Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="ECDH"/>
+    </condition>
+    <condition id="CycloneSSL DHE Dependencies">
+      <description>CycloneSSL DHE Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="PKC" Csub="DH"/>
+    </condition>
+    <condition id="CycloneSSL ECDHE Dependencies">
+      <description>CycloneSSL ECDHE Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="ECDH"/>
+    </condition>
+    <condition id="CycloneSSL PSK_DHE Dependencies">
+      <description>CycloneSSL PSK_DHE Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="PKC" Csub="DH"/>
+    </condition>
+    <condition id="CycloneSSL PSK_ECDHE Dependencies">
+      <description>CycloneSSL PSK_ECDHE Dependencies</description>
       <require Cclass="CycloneSSL" Cgroup="Core"/>
       <require Cclass="CycloneCrypto" Cgroup="ECC" Csub="ECDH"/>
     </condition>
@@ -1092,6 +1128,17 @@
       <require Cclass="CycloneCrypto" Cgroup="MPI" Csub="Core"/>
       <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="ASN.1"/>
     </condition>
+    <condition id="CycloneCrypto bcrypt Dependencies">
+      <description>CycloneCrypto bcrypt Dependencies</description>
+      <require Cclass="CycloneCrypto" Cgroup="Cipher Mode" Csub="ECB"/>
+      <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="Radix64"/>
+    </condition>
+    <condition id="CycloneCrypto scrypt Dependencies">
+      <description>CycloneCrypto scrypt Dependencies</description>
+      <require Cclass="CycloneCrypto" Cgroup="KDF" Csub="PKCS #5"/>
+      <require Cclass="CycloneCrypto" Cgroup="Hash" Csub="SHA-256"/>
+      <require Cclass="CycloneCrypto" Cgroup="Cipher" Csub="Salsa20"/>
+    </condition>
     <condition id="CycloneCrypto Yarrow Dependencies">
       <description>CycloneCrypto Yarrow Dependencies</description>
       <require Cclass="CycloneCrypto" Cgroup="Hash" Csub="SHA-256"/>
@@ -1141,6 +1188,7 @@
     <description Cclass="CycloneTCP" Cgroup="Icecast">Icecast Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="Modbus">Modbus/TCP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="WebSocket">WebSocket Protocol</description>
+    <description Cclass="CycloneTCP" Cgroup="Ping">Ping Utility</description>
     <description Cclass="CycloneTCP" Cgroup="PPP">Point-to-Point Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="Drivers (MAC)">Ethernet MAC Drivers</description>
     <description Cclass="CycloneTCP" Cgroup="Drivers (PHY)">Ethernet PHY Drivers</description>
@@ -1149,7 +1197,8 @@
     <description Cclass="CycloneTCP" Cgroup="Drivers (Wi-Fi)">Wi-Fi Drivers</description>
     
     <description Cclass="CycloneSSL">TLS/DTLS Library</description>
-    <description Cclass="CycloneSSL" Cgroup="Key Exchange">Key Exchange Algorithms</description>
+    <description Cclass="CycloneSSL" Cgroup="Key Exchange">Key Exchange Algorithms (TLS 1.0, 1.1 and 1.2)</description>
+    <description Cclass="CycloneSSL" Cgroup="Key Exchange (TLS 1.3)">Key Exchange Algorithms (TLS 1.3)</description>
     <description Cclass="CycloneSSL" Cgroup="Signature">Signature Algorithms</description>
     <description Cclass="CycloneSSL" Cgroup="Cipher Mode">Block Cipher Modes</description>
     <description Cclass="CycloneSSL" Cgroup="AEAD">Authenticated Encryption with Associated Data</description>
@@ -1170,14 +1219,14 @@
     <description Cclass="CycloneCrypto" Cgroup="KDF">Key Derivation Functions</description>
     <description Cclass="CycloneCrypto" Cgroup="RNG">Random Number Generators</description>
     <description Cclass="CycloneCrypto" Cgroup="Encoding">Data Encoding Schemes</description>
-    <description Cclass="CycloneCrypto" Cgroup="Certificate">Certificate Parsing</description>
+    <description Cclass="CycloneCrypto" Cgroup="PKIX">Public-Key Infrastructure (X.509)</description>
   </taxonomy>
   
   <!-- Components section -->
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="1.9.4">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="1.9.6">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1297,6 +1346,7 @@
         <files>
           <file category="include" name="common/"/>
           <file category="header" name="common/fs_port.h"/>
+          <file category="header" name="common/fs_port_fatfs.h"/>
           <file category="source" name="common/fs_port_fatfs.c"/>
           <file category="header" name="config/fs_port_config.h" attr="config" version="1.9.0"/>
         </files>
@@ -1333,7 +1383,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="1.9.4">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="1.9.6">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -1848,13 +1898,17 @@
           <file category="include" name="cyclone_tcp/"/>
           
           <file category="header" name="cyclone_tcp/ftp/ftp_server.h"/>
-          <file category="header" name="cyclone_tcp/ftp/ftp_server_events.h"/>
           <file category="header" name="cyclone_tcp/ftp/ftp_server_commands.h"/>
+          <file category="header" name="cyclone_tcp/ftp/ftp_server_control.h"/>
+          <file category="header" name="cyclone_tcp/ftp/ftp_server_data.h"/>
+          <file category="header" name="cyclone_tcp/ftp/ftp_server_transport.h"/>
           <file category="header" name="cyclone_tcp/ftp/ftp_server_misc.h"/>
           
           <file category="source" name="cyclone_tcp/ftp/ftp_server.c"/>
-          <file category="source" name="cyclone_tcp/ftp/ftp_server_events.c"/>
           <file category="source" name="cyclone_tcp/ftp/ftp_server_commands.c"/>
+          <file category="source" name="cyclone_tcp/ftp/ftp_server_control.c"/>
+          <file category="source" name="cyclone_tcp/ftp/ftp_server_data.c"/>
+          <file category="source" name="cyclone_tcp/ftp/ftp_server_transport.c"/>
           <file category="source" name="cyclone_tcp/ftp/ftp_server_misc.c"/>
         </files>
       </component>
@@ -1869,13 +1923,17 @@
           <file category="include" name="cyclone_tcp/"/>
           
           <file category="header" name="cyclone_tcp/ftp/ftp_server.h"/>
-          <file category="header" name="cyclone_tcp/ftp/ftp_server_events.h"/>
           <file category="header" name="cyclone_tcp/ftp/ftp_server_commands.h"/>
+          <file category="header" name="cyclone_tcp/ftp/ftp_server_control.h"/>
+          <file category="header" name="cyclone_tcp/ftp/ftp_server_data.h"/>
+          <file category="header" name="cyclone_tcp/ftp/ftp_server_transport.h"/>
           <file category="header" name="cyclone_tcp/ftp/ftp_server_misc.h"/>
           
           <file category="source" name="cyclone_tcp/ftp/ftp_server.c"/>
-          <file category="source" name="cyclone_tcp/ftp/ftp_server_events.c"/>
           <file category="source" name="cyclone_tcp/ftp/ftp_server_commands.c"/>
+          <file category="source" name="cyclone_tcp/ftp/ftp_server_control.c"/>
+          <file category="source" name="cyclone_tcp/ftp/ftp_server_data.c"/>
+          <file category="source" name="cyclone_tcp/ftp/ftp_server_transport.c"/>
           <file category="source" name="cyclone_tcp/ftp/ftp_server_misc.c"/>
         </files>
       </component>
@@ -2558,6 +2616,18 @@
         </files>
       </component>
       
+      <component Cgroup="Ping" Csub="Core" condition="CycloneTCP Core Dependencies">
+        <description>Core</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_PING
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/core/ping.h"/>
+          <file category="source" name="cyclone_tcp/core/ping.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="PPP" Csub="Core" condition="CycloneTCP Core Dependencies">
         <description>Core</description>
         <RTE_Components_h>
@@ -2705,70 +2775,12 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="K6x" condition="CycloneTCP Core Dependencies">
-        <description>NXP Kinetis K6x Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="GD32F307" condition="CycloneTCP Core Dependencies">
+        <description>GigaDevice GD32F307 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mk6x_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mk6x_eth_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (MAC)" Csub="K7x" condition="CycloneTCP Core Dependencies">
-        <description>NXP Kinetis K7x Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mk7x_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mk7x_eth_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (MAC)" Csub="KV5x" condition="CycloneTCP Core Dependencies">
-        <description>NXP Kinetis KV5x Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mkv5x_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mkv5x_eth_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (MAC)" Csub="i.MX RT1020" condition="CycloneTCP Core Dependencies">
-        <description>NXP i.MX RT1020 Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1020_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1020_eth_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (MAC)" Csub="i.MX RT1050" condition="CycloneTCP Core Dependencies">
-        <description>NXP i.MX RT1050 Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1050_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1050_eth_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (MAC)" Csub="i.MX RT1060" condition="CycloneTCP Core Dependencies">
-        <description>NXP i.MX RT1060 Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1060_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1060_eth_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (MAC)" Csub="i.MX6UL" condition="CycloneTCP Core Dependencies">
-        <description>NXP i.MX6UL Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          
-          <file category="header" name="cyclone_tcp/drivers/mac/mcimx6ul_eth1_driver.h"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mcimx6ul_eth2_driver.h"/>
-          
-          <file category="source" name="cyclone_tcp/drivers/mac/mcimx6ul_eth1_driver.c"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mcimx6ul_eth2_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/gd32f307_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/gd32f307_eth_driver.c"/>
         </files>
       </component>
       
@@ -2826,8 +2838,17 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC1750" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC1750 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="M487" condition="CycloneTCP Core Dependencies">
+        <description>Nuvoton M487 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/m487_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/m487_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="LPC175x" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC175x Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/lpc175x_eth_driver.h"/>
@@ -2835,8 +2856,8 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC1760" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC1760 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="LPC176x" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC176x Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/lpc176x_eth_driver.h"/>
@@ -2844,8 +2865,8 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC1780" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC1780 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="LPC178x" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC178x Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/lpc178x_eth_driver.h"/>
@@ -2853,8 +2874,8 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC1800" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC1800 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="LPC18xx" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC18xx Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/lpc18xx_eth_driver.h"/>
@@ -2862,8 +2883,8 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC2300" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC2300 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="LPC23xx" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC23xx Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/lpc23xx_eth_driver.h"/>
@@ -2871,8 +2892,8 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC4300" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC4300 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="LPC43xx" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC43xx Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/lpc43xx_eth_driver.h"/>
@@ -2880,14 +2901,90 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC54608" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC54608 Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="LPC546xx" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC546xx Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/lpc54608_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/lpc54608_eth_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/lpc546xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/lpc546xx_eth_driver.c"/>
         </files>
       </component>      
+      
+      <component Cgroup="Drivers (MAC)" Csub="K6x" condition="CycloneTCP Core Dependencies">
+        <description>NXP Kinetis K6x Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mk6x_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mk6x_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="K7x" condition="CycloneTCP Core Dependencies">
+        <description>NXP Kinetis K7x Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mk7x_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mk7x_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="KV5x" condition="CycloneTCP Core Dependencies">
+        <description>NXP Kinetis KV5x Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mkv5x_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mkv5x_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="i.MX RT1020" condition="CycloneTCP Core Dependencies">
+        <description>NXP i.MX RT1020 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1020_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1020_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="i.MX RT1050" condition="CycloneTCP Core Dependencies">
+        <description>NXP i.MX RT1050 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1050_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1050_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="i.MX RT1060" condition="CycloneTCP Core Dependencies">
+        <description>NXP i.MX RT1060 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1060_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1060_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="S32K148" condition="CycloneTCP Core Dependencies">
+        <description>NXP S32K148 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/s32k148_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/s32k148_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="i.MX6UL" condition="CycloneTCP Core Dependencies">
+        <description>NXP i.MX6UL Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/drivers/mac/mcimx6ul_eth1_driver.h"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mcimx6ul_eth2_driver.h"/>
+          
+          <file category="source" name="cyclone_tcp/drivers/mac/mcimx6ul_eth1_driver.c"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mcimx6ul_eth2_driver.c"/>
+        </files>
+      </component>
       
       <component Cgroup="Drivers (MAC)" Csub="S5D9" condition="CycloneTCP Core Dependencies">
         <description>Renesas Synergy S5D9 Ethernet MAC controller</description>
@@ -3089,7 +3186,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ8031" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8031 Ethernet PHY transceiver</description>
+        <description>Microchip KSZ8031 Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz8031_driver.h"/>
@@ -3098,7 +3195,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ8041" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8041 Ethernet PHY transceiver</description>
+        <description>Microchip KSZ8041 Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz8041_driver.h"/>
@@ -3107,7 +3204,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ8051" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8051 Ethernet PHY transceiver</description>
+        <description>Microchip KSZ8051 Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz8051_driver.h"/>
@@ -3116,7 +3213,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ8061" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8061 Ethernet PHY transceiver</description>
+        <description>Microchip KSZ8061 Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz8061_driver.h"/>
@@ -3125,7 +3222,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ8081" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8081 Ethernet PHY transceiver</description>
+        <description>Microchip KSZ8081 Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz8081_driver.h"/>
@@ -3134,7 +3231,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ8091" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8091 Ethernet PHY transceiver</description>
+        <description>Microchip KSZ8091 Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz8091_driver.h"/>
@@ -3143,7 +3240,7 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ8721" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8721 Ethernet PHY transceiver</description>
+        <description>Microchip KSZ8721 Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz8721_driver.h"/>
@@ -3152,11 +3249,74 @@
       </component>
       
       <component Cgroup="Drivers (PHY)" Csub="KSZ9031" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ9031 Gigabit Ethernet PHY transceiver</description>
+        <description>Microchip KSZ9031 Gigabit Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz9031_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/phy/ksz9031_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8700" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8700 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8700_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8700_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8710" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8710 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8710_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8710_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8720" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8720 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8720_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8720_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8740" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8740 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8740_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8740_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8742" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8742 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8742_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8742_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="TJA1100" condition="CycloneTCP Core Dependencies">
+        <description>NXP TJA1100 100Base-T1 PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/tja1100_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/tja1100_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="TJA1101" condition="CycloneTCP Core Dependencies">
+        <description>NXP TJA1101 100Base-T1 PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/tja1101_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/tja1101_driver.c"/>
         </files>
       </component>
       
@@ -3187,51 +3347,6 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (PHY)" Csub="LAN8700" condition="CycloneTCP Core Dependencies">
-        <description>SMSC LAN8700 Ethernet PHY transceiver</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/lan8700_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/lan8700_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (PHY)" Csub="LAN8710" condition="CycloneTCP Core Dependencies">
-        <description>SMSC LAN8710 Ethernet PHY transceiver</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/lan8710_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/lan8710_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (PHY)" Csub="LAN8720" condition="CycloneTCP Core Dependencies">
-        <description>SMSC LAN8720 Ethernet PHY transceiver</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/lan8720_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/lan8720_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (PHY)" Csub="LAN8740" condition="CycloneTCP Core Dependencies">
-        <description>SMSC LAN8740 Ethernet PHY transceiver</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/lan8740_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/lan8740_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (PHY)" Csub="LAN8742" condition="CycloneTCP Core Dependencies">
-        <description>SMSC LAN8742 Ethernet PHY transceiver</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/lan8742_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/lan8742_driver.c"/>
-        </files>
-      </component>
-      
       <component Cgroup="Drivers (PHY)" Csub="ST802RT1A" condition="CycloneTCP Core Dependencies">
         <description>ST ST802RT1A Ethernet PHY transceiver</description>
         <files>
@@ -3259,15 +3374,6 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (PHY)" Csub="DP83848" condition="CycloneTCP Core Dependencies">
-        <description>TI DP83848 Ethernet PHY transceiver</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/dp83848_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/dp83848_driver.c"/>
-        </files>
-      </component>
-      
       <component Cgroup="Drivers (PHY)" Csub="DP83822" condition="CycloneTCP Core Dependencies">
         <description>TI DP83822 Ethernet PHY transceiver</description>
         <files>
@@ -3277,8 +3383,26 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="DP83848" condition="CycloneTCP Core Dependencies">
+        <description>TI DP83848 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/dp83848_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/dp83848_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="DP83TC811" condition="CycloneTCP Core Dependencies">
+        <description>TI DP83TC811 100Base-T1 PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/dp83tc811_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/dp83tc811_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Switch)" Csub="KSZ8463" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8463 Ethernet switch</description>
+        <description>Microchip KSZ8463 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8463_driver.h"/>
@@ -3287,7 +3411,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="KSZ8563" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8563 Ethernet switch</description>
+        <description>Microchip KSZ8563 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8563_driver.h"/>
@@ -3296,7 +3420,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="KSZ8794" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8794 Ethernet switch</description>
+        <description>Microchip KSZ8794 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8794_driver.h"/>
@@ -3305,7 +3429,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="KSZ8863" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8863 Ethernet switch</description>
+        <description>Microchip KSZ8863 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8863_driver.h"/>
@@ -3313,8 +3437,17 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Switch)" Csub="KSZ8864" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ8864 Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz8864_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz8864_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Switch)" Csub="KSZ8873" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8873 Ethernet switch</description>
+        <description>Microchip KSZ8873 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8873_driver.h"/>
@@ -3323,7 +3456,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="KSZ8895" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8895 Ethernet switch</description>
+        <description>Microchip KSZ8895 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8895_driver.h"/>
@@ -3332,7 +3465,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="KSZ9477" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ9477 Gigabit Ethernet switch</description>
+        <description>Microchip KSZ9477 Gigabit Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz9477_driver.h"/>
@@ -3341,7 +3474,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="KSZ9563" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ9563 Gigabit Ethernet switch</description>
+        <description>Microchip KSZ9563 Gigabit Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz9563_driver.h"/>
@@ -3350,7 +3483,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="KSZ9893" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ9893 Gigabit Ethernet switch</description>
+        <description>Microchip KSZ9893 Gigabit Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz9893_driver.h"/>
@@ -3359,7 +3492,7 @@
       </component>
       
       <component Cgroup="Drivers (Switch)" Csub="LAN9303" condition="CycloneTCP Core Dependencies">
-        <description>SMSC LAN9303 Ethernet switch</description>
+        <description>Microchip LAN9303 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/lan9303_driver.h"/>
@@ -3373,15 +3506,6 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/eth/dm9000_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/eth/dm9000_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (Ethernet)" Csub="KSZ8851" condition="CycloneTCP Core Dependencies">
-        <description>Micrel KSZ8851 Ethernet controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/eth/ksz8851_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/eth/ksz8851_driver.c"/>
         </files>
       </component>
       
@@ -3400,6 +3524,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/eth/enc624j600_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/eth/enc624j600_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Ethernet)" Csub="KSZ8851" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ8851 Ethernet controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/ksz8851_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/ksz8851_driver.c"/>
         </files>
       </component>
       
@@ -3586,7 +3719,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="1.9.4">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="1.9.6">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -3651,6 +3784,7 @@
           <file category="include" name="cyclone_ssl/"/>
           
           <file category="header" name="cyclone_ssl/tls_client.h"/>
+          <file category="header" name="cyclone_ssl/tls_client_fsm.h"/>
           <file category="header" name="cyclone_ssl/tls_client_extensions.h"/>
           <file category="header" name="cyclone_ssl/tls_client_misc.h"/>
           <file category="header" name="cyclone_ssl/tls13_client.h"/>
@@ -3658,6 +3792,7 @@
           <file category="header" name="cyclone_ssl/tls13_client_misc.h"/>
           
           <file category="source" name="cyclone_ssl/tls_client.c"/>
+          <file category="source" name="cyclone_ssl/tls_client_fsm.c"/>
           <file category="source" name="cyclone_ssl/tls_client_extensions.c"/>
           <file category="source" name="cyclone_ssl/tls_client_misc.c"/>
           <file category="source" name="cyclone_ssl/tls13_client.c"/>
@@ -3675,6 +3810,7 @@
           <file category="include" name="cyclone_ssl/"/>
           
           <file category="header" name="cyclone_ssl/tls_server.h"/>
+          <file category="header" name="cyclone_ssl/tls_server_fsm.h"/>
           <file category="header" name="cyclone_ssl/tls_server_extensions.h"/>
           <file category="header" name="cyclone_ssl/tls_server_misc.h"/>
           <file category="header" name="cyclone_ssl/tls13_server.h"/>
@@ -3682,6 +3818,7 @@
           <file category="header" name="cyclone_ssl/tls13_server_misc.h"/>
           
           <file category="source" name="cyclone_ssl/tls_server.c"/>
+          <file category="source" name="cyclone_ssl/tls_server_fsm.c"/>
           <file category="source" name="cyclone_ssl/tls_server_extensions.c"/>
           <file category="source" name="cyclone_ssl/tls_server_misc.c"/>
           <file category="source" name="cyclone_ssl/tls13_server.c"/>
@@ -3700,12 +3837,14 @@
           <file category="include" name="cyclone_ssl/"/>
           
           <file category="header" name="cyclone_ssl/tls_client.h"/>
+          <file category="header" name="cyclone_ssl/tls_client_fsm.h"/>
           <file category="header" name="cyclone_ssl/tls_client_extensions.h"/>
           <file category="header" name="cyclone_ssl/tls_client_misc.h"/>
           <file category="header" name="cyclone_ssl/dtls_record.h"/>
           <file category="header" name="cyclone_ssl/dtls_misc.h"/>
           
           <file category="source" name="cyclone_ssl/tls_client.c"/>
+          <file category="source" name="cyclone_ssl/tls_client_fsm.c"/>
           <file category="source" name="cyclone_ssl/tls_client_extensions.c"/>
           <file category="source" name="cyclone_ssl/tls_client_misc.c"/>
           <file category="source" name="cyclone_ssl/dtls_record.c"/>
@@ -3723,12 +3862,14 @@
           <file category="include" name="cyclone_ssl/"/>
           
           <file category="header" name="cyclone_ssl/tls_server.h"/>
+          <file category="header" name="cyclone_ssl/tls_server_fsm.h"/>
           <file category="header" name="cyclone_ssl/tls_server_extensions.h"/>
           <file category="header" name="cyclone_ssl/tls_server_misc.h"/>
           <file category="header" name="cyclone_ssl/dtls_record.h"/>
           <file category="header" name="cyclone_ssl/dtls_misc.h"/>
           
           <file category="source" name="cyclone_ssl/tls_server.c"/>
+          <file category="source" name="cyclone_ssl/tls_server_fsm.c"/>
           <file category="source" name="cyclone_ssl/tls_server_extensions.c"/>
           <file category="source" name="cyclone_ssl/tls_server_misc.c"/>
           <file category="source" name="cyclone_ssl/dtls_record.c"/>
@@ -3830,6 +3971,51 @@
         <description>ECDHE_PSK Key Exchange</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSL_ECDHE_PSK_KE
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange (TLS 1.3)" Csub="DHE" condition="CycloneSSL DHE Dependencies">
+        <description>DHE Key Exchange (TLS 1.3)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_TLS13_DHE_KE
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange (TLS 1.3)" Csub="ECDHE" condition="CycloneSSL ECDHE Dependencies">
+        <description>ECDHE Key Exchange (TLS 1.3)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_TLS13_ECDHE_KE
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange (TLS 1.3)" Csub="PSK" condition="CycloneSSL PSK Dependencies">
+        <description>PSK-only Key Exchange (TLS 1.3)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_TLS13_PSK_KE
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange (TLS 1.3)" Csub="PSK_DHE" condition="CycloneSSL PSK_DHE Dependencies">
+        <description>PSK with DHE Key Exchange (TLS 1.3)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_TLS13_PSK_DHE_KE
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange (TLS 1.3)" Csub="PSK_ECDHE" condition="CycloneSSL PSK_ECDHE Dependencies">
+        <description>PSK with ECDHE Key Exchange (TLS 1.3)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSL_TLS13_PSK_ECDHE_KE
         </RTE_Components_h>
         <files>
         </files>
@@ -4234,7 +4420,7 @@
     </bundle>
     
     <!-- CycloneCrypto -->
-    <bundle Cbundle="CycloneCrypto" Cclass="CycloneCrypto" Cversion="1.9.4">
+    <bundle Cbundle="CycloneCrypto" Cclass="CycloneCrypto" Cversion="1.9.6">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -4695,6 +4881,18 @@
         </files>
       </component>
       
+      <component Cgroup="Cipher" Csub="Salsa20" condition="CycloneCrypto Core Dependencies">
+        <description>Salsa20 Stream Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_SALSA20
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/cipher/salsa20.h"/>
+          <file category="source" name="cyclone_crypto/cipher/salsa20.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Cipher" Csub="RC2" condition="CycloneCrypto Core Dependencies">
         <description>RC2 Block Cipher</description>
         <RTE_Components_h>
@@ -4764,6 +4962,18 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/cipher/aes.h"/>
           <file category="source" name="cyclone_crypto/cipher/aes.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="Blowfish" condition="CycloneCrypto Core Dependencies">
+        <description>Blowfish Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_BLOWFISH
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/cipher/blowfish.h"/>
+          <file category="source" name="cyclone_crypto/cipher/blowfish.c"/>
         </files>
       </component>
       
@@ -4983,6 +5193,30 @@
         </files>
       </component>
       
+      <component Cgroup="KDF" Csub="bcrypt" condition="CycloneCrypto bcrypt Dependencies">
+        <description>bcrypt Password Hashing Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_BCRYPT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/kdf/bcrypt.h"/>
+          <file category="source" name="cyclone_crypto/kdf/bcrypt.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="KDF" Csub="scrypt" condition="CycloneCrypto scrypt Dependencies">
+        <description>scrypt Password-Based Key Derivation Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_SCRYPT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/kdf/scrypt.h"/>
+          <file category="source" name="cyclone_crypto/kdf/scrypt.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="ECC" Csub="Core" condition="CycloneCrypto ECC Dependencies">
         <description>Elliptic Curve Cryptography</description>
         <RTE_Components_h>
@@ -5142,6 +5376,18 @@
         </files>
       </component>
       
+      <component Cgroup="Encoding" Csub="Radix64" condition="CycloneCrypto Core Dependencies">
+        <description>Radix64 Encoding/Decoding</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_RADIX64
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/encoding/radix64.h"/>
+          <file category="source" name="cyclone_crypto/encoding/radix64.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Encoding" Csub="ASN.1" condition="CycloneCrypto ASN.1 Dependencies">
         <description>ASN.1 Encoding/Decoding</description>
         <RTE_Components_h>
@@ -5166,7 +5412,43 @@
         </files>
       </component>
       
-      <component Cgroup="Certificate" Csub="X.509 Cert Parse" condition="CycloneCrypto X.509 Dependencies">
+      <component Cgroup="PKIX" Csub="Key Parsing" condition="CycloneCrypto X.509 Dependencies">
+        <description>Public/Private Key Parsing</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/pkcs8_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/pkcs8_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="PKIX" Csub="Key Formatting" condition="CycloneCrypto X.509 Dependencies">
+        <description>Public/Private Key Formatting</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/pkcs8_key_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/pkcs8_key_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="PKIX" Csub="Certificate Parsing" condition="CycloneCrypto X.509 Dependencies">
         <description>X.509 Certificate Parsing</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_CRYPTO_X509
@@ -5174,15 +5456,35 @@
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
-          <file category="header" name="cyclone_crypto/certificate/x509_cert_parse.h"/>
-          <file category="header" name="cyclone_crypto/certificate/x509_common.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
            
-          <file category="source" name="cyclone_crypto/certificate/x509_cert_parse.c"/>
-          <file category="source" name="cyclone_crypto/certificate/x509_common.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
         </files>
       </component>
       
-      <component Cgroup="Certificate" Csub="X.509 Cert Validate" condition="CycloneCrypto X.509 Dependencies">
+      <component Cgroup="PKIX" Csub="Certificate Creation" condition="CycloneCrypto X.509 Dependencies">
+        <description>X.509 Certificate Creation</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_create.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_create.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+
+      <component Cgroup="PKIX" Csub="Certificate Validation" condition="CycloneCrypto X.509 Dependencies">
         <description>X.509 Certificate Validation</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_CRYPTO_X509
@@ -5190,23 +5492,161 @@
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
-          <file category="header" name="cyclone_crypto/certificate/x509_cert_validate.h"/>
-          <file category="header" name="cyclone_crypto/certificate/x509_common.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
            
-          <file category="source" name="cyclone_crypto/certificate/x509_cert_validate.c"/>
-          <file category="source" name="cyclone_crypto/certificate/x509_common.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
         </files>
       </component>
       
-      <component Cgroup="Certificate" Csub="PEM Import" condition="CycloneCrypto PEM Dependencies">
-        <description>PEM Certificate Import</description>
+      <component Cgroup="PKIX" Csub="CRL Parsing" condition="CycloneCrypto X.509 Dependencies">
+        <description>X.509 CRL Parsing</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/x509_crl_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/x509_crl_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+
+      <component Cgroup="PKIX" Csub="CRL Validation" condition="CycloneCrypto X.509 Dependencies">
+        <description>X.509 CRL Validation</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/x509_crl_validate.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_crl_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/x509_crl_validate.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_crl_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="PKIX" Csub="CSR Parsing" condition="CycloneCrypto X.509 Dependencies">
+        <description>CSR Parsing</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/x509_csr_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/x509_csr_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="PKIX" Csub="CSR Creation" condition="CycloneCrypto X.509 Dependencies">
+        <description>CSR Creation</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/x509_csr_create.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_create.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/x509_csr_create.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_create.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+
+      <component Cgroup="PKIX" Csub="CSR Validation" condition="CycloneCrypto X.509 Dependencies">
+        <description>CSR Validation</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_X509
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/x509_csr_validate.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+           
+          <file category="source" name="cyclone_crypto/pkix/x509_csr_validate.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="PKIX" Csub="PEM File Import" condition="CycloneCrypto PEM Dependencies">
+        <description>PEM File Import</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_CRYPTO_PEM
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_crypto/"/>
-          <file category="header" name="cyclone_crypto/certificate/pem_import.h"/>
-          <file category="source" name="cyclone_crypto/certificate/pem_import.c"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/pem_import.h"/>
+          <file category="header" name="cyclone_crypto/pkix/pkcs8_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+          
+          <file category="source" name="cyclone_crypto/pkix/pem_import.c"/>
+          <file category="source" name="cyclone_crypto/pkix/pkcs8_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="PKIX" Csub="PEM File Export" condition="CycloneCrypto PEM Dependencies">
+        <description>PEM File Export</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_PEM
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/pem_export.h"/>
+          <file category="header" name="cyclone_crypto/pkix/pkcs8_key_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_key_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
+          
+          <file category="source" name="cyclone_crypto/pkix/pem_export.c"/>
+          <file category="source" name="cyclone_crypto/pkix/pkcs8_key_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
         </files>
       </component>
     </bundle>
@@ -5296,7 +5736,6 @@
         <keyword>MQTT</keyword>
         <keyword>Client</keyword>
         <keyword>IoT</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
@@ -5381,9 +5820,30 @@
         <keyword>TCP</keyword>
         <keyword>FTP</keyword>
         <keyword>FTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- MQTT Client Demo (Nucleo-F207ZG) -->
+    <example name="CycloneTCP MQTT Client Demo" doc="abstract.txt" folder="demo/nucleo_f207zg/mqtt_client_demo">
+      <description>MQTT client demo (CycloneTCP, CycloneSSL and CMSIS-RTOS)</description>
+      <board name="NUCLEO-F207ZG" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="mqtt_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>MQTT</keyword>
+        <keyword>Client</keyword>
+        <keyword>IoT</keyword>
+        <keyword>TLS</keyword>
       </attributes>
     </example>
     
@@ -5426,7 +5886,6 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>HTTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -5449,7 +5908,6 @@
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
         <keyword>SMTP</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Client</keyword>
       </attributes>
@@ -5469,7 +5927,6 @@
         <component Cclass="CycloneCrypto"/>
         <category>Middleware</category>
         <category>Security</category>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Client</keyword>
       </attributes>
@@ -5489,7 +5946,6 @@
         <component Cclass="CycloneCrypto"/>
         <category>Middleware</category>
         <category>Security</category>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -5556,7 +6012,6 @@
         <keyword>MQTT</keyword>
         <keyword>Client</keyword>
         <keyword>IoT</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
@@ -5682,7 +6137,6 @@
         <keyword>TCP</keyword>
         <keyword>FTP</keyword>
         <keyword>FTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
         <keyword>FatFs</keyword>
@@ -5728,7 +6182,6 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>HTTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -5751,7 +6204,6 @@
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
         <keyword>SMTP</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Client</keyword>
       </attributes>
@@ -5792,7 +6244,6 @@
         <component Cclass="CycloneCrypto"/>
         <category>Middleware</category>
         <category>Security</category>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Client</keyword>
       </attributes>
@@ -5812,7 +6263,6 @@
         <component Cclass="CycloneCrypto"/>
         <category>Middleware</category>
         <category>Security</category>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -5855,7 +6305,6 @@
         <keyword>TCP</keyword>
         <keyword>FTP</keyword>
         <keyword>FTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
         <keyword>FatFs</keyword>
@@ -5901,7 +6350,6 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>HTTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -6006,7 +6454,6 @@
         <keyword>TCP</keyword>
         <keyword>FTP</keyword>
         <keyword>FTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
         <keyword>FatFs</keyword>
@@ -6052,7 +6499,6 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>HTTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -6137,7 +6583,6 @@
         <keyword>TCP</keyword>
         <keyword>FTP</keyword>
         <keyword>FTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
@@ -6180,7 +6625,6 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>HTTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
@@ -6224,7 +6668,6 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>HTTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -6247,7 +6690,6 @@
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
         <keyword>SMTP</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Client</keyword>
       </attributes>
@@ -6311,7 +6753,6 @@
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
         <keyword>WebSocket</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
@@ -6377,7 +6818,6 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>HTTPS</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
@@ -6401,7 +6841,6 @@
         <keyword>MQTT</keyword>
         <keyword>Client</keyword>
         <keyword>IoT</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
@@ -6468,7 +6907,6 @@
         <keyword>MQTT</keyword>
         <keyword>Client</keyword>
         <keyword>IoT</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
@@ -6535,7 +6973,6 @@
         <keyword>MQTT</keyword>
         <keyword>Client</keyword>
         <keyword>IoT</keyword>
-        <keyword>SSL</keyword>
         <keyword>TLS</keyword>
       </attributes>
     </example>
