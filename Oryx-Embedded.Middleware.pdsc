@@ -10,7 +10,7 @@
   
   <!-- Releases section -->
   <releases>
-    <release version="1.9.6" date="2019-11-27">
+    <release version="1.9.6" date="2019-11-28">
       - Added TLS support for FTP server (explicit and implicit TLS modes ares supported)
       - Support for IP_MULTICAST_TTL option (BSD sockets)
       - Added driver for NXP S32K148 Ethernet MAC
