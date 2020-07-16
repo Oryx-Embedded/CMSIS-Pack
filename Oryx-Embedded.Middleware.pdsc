@@ -3,13 +3,29 @@
 <package schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="PACK.xsd">
   <vendor>Oryx-Embedded</vendor>
   <name>Middleware</name>
-  <description>Middleware Package (CycloneTCP, CycloneSSL and CycloneCrypto)</description>
+  <description>Middleware Package (CycloneTCP, CycloneSSL, CycloneSTP, CycloneACME and CycloneCRYPTO)</description>
   <url>https://www.oryx-embedded.com/download/pack/</url>
   <supportContact>support@oryx-embedded.com</supportContact>
   <license>doc/license.txt</license>
   
   <!-- Releases section -->
   <releases>
+    <release version="1.9.8" date="2020-07-16">
+      - ACME (Automatic Certificate Management Environment) client library. Part of CycloneACME
+      - STP (Spanning Tree Protocol) bridge implementation. Part of CycloneSTP
+      - RSTP (Rapid Spanning Tree Protocol) bridge implementation. Part of CycloneSTP
+      - Added support for BRIDGE-MIB (RFC 4188) and RSTP-MIB (RFC 4318) databases
+      - CoAP server implementation (including support for DTLS-secured CoAP)
+      - gethostbyname and inet_ntoa now conform to BSD API. Added gethostbyname_r and inet_ntoa_r (reentrant versions)
+      - Added new socket APIs (socketSetDscp, socketSetVlanPcp and socketSetVlanDei) to assign DSCP, PCP and DEI per socket
+      - Added Ethernet MAC driver for Renesas RA6M3
+      - Added support for DP83630 Ethernet PHY
+      - New Ethernet switches supported (Microchip KSZ8775, KSZ8795, KSZ9897 and Marvell 88E6060)
+      - Added Wi-Fi driver for Silicon Labs WF200 chip
+      - Added support for tickets at DTLS client side
+      - Added TLS 1.3 integrity-only cipher suites (TLS_SHA256_SHA256 and TLS_SHA384_SH384)
+      - Generation of X.509 certificates and CSRs with custom extensions
+    </release>
     <release version="1.9.6" date="2019-11-28">
       - Added TLS support for FTP server (explicit and implicit TLS modes ares supported)
       - Support for IP_MULTICAST_TTL option (BSD sockets)
@@ -354,6 +370,58 @@
       <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
       <require Cclass="RTOS" Cgroup="uC/OS Kernel" Cvariant="uCOS-III"/>
     </condition>
+    <condition id="MDK-Pro File System Dependencies">
+      <description>MDK-Pro File System Dependencies</description>
+      <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
+      <require Cclass="File System" Cgroup="CORE"/>
+    </condition>
+    
+    <!-- CycloneACME Dependencies -->
+    <condition id="CycloneACME Dependencies">
+      <description>CycloneACME Dependencies</description>
+      <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
+    </condition>
+    <condition id="CycloneACME ACME Client Dependencies">
+      <description>CycloneACME ACME Client Dependencies</description>
+      <require Cclass="CycloneACME" Cgroup="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client" Cvariant="TLS"/>
+    </condition>
+    <condition id="CycloneACME ACME-DNS Client Dependencies">
+      <description>CycloneACME ACME-DNS Client Dependencies</description>
+      <require Cclass="CycloneACME" Cgroup="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client"/>
+    </condition>
+    <condition id="CycloneACME ACME-DNS Client TLS Dependencies">
+      <description>CycloneACME ACME-DNS Client Dependencies</description>
+      <require Cclass="CycloneACME" Cgroup="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client" Cvariant="TLS"/>
+    </condition>
+    
+    <!-- CycloneSTP Dependencies -->
+    <condition id="CycloneSTP Dependencies">
+      <description>CycloneSTP Dependencies</description>
+      <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
+    </condition>
+    <condition id="CycloneSTP STP Dependencies">
+      <description>CycloneSTP STP Dependencies</description>
+      <require Cclass="CycloneSTP" Cgroup="Core"/>
+    </condition>
+    <condition id="CycloneSTP RSTP Dependencies">
+      <description>CycloneSTP RSTP Dependencies</description>
+      <require Cclass="CycloneSTP" Cgroup="Core"/>
+    </condition>
+    <condition id="CycloneSTP BRIDGE-MIB Dependencies">
+      <description>CycloneSTP BRIDGE-MIB Dependencies</description>
+      <require Cclass="CycloneSTP" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="ASN.1"/>
+      <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="OID"/>
+    </condition>
+    <condition id="CycloneSTP RSTP-MIB Dependencies">
+      <description>CycloneSTP RSTP-MIB Dependencies</description>
+      <require Cclass="CycloneSTP" Cgroup="Core"/>
+      <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="ASN.1"/>
+      <require Cclass="CycloneCrypto" Cgroup="Encoding" Csub="OID"/>
+    </condition>
     
     <!-- CycloneTCP Dependencies -->
     <condition id="CycloneTCP Dependencies">
@@ -456,6 +524,17 @@
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
       <require Cclass="CycloneTCP" Cgroup="Socket"/>
       <require Cclass="CycloneSSL" Cgroup="DTLS Client"/>
+    </condition>
+    <condition id="CycloneTCP CoAP Server Dependencies">
+      <description>CycloneTCP CoAP Server Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="UDP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+    </condition>
+    <condition id="CycloneTCP CoAP Server DTLS Dependencies">
+      <description>CycloneTCP CoAP Server DTLS Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="UDP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+      <require Cclass="CycloneSSL" Cgroup="DTLS Server"/>
     </condition>
     <condition id="CycloneTCP FTP Client Dependencies">
       <description>CycloneTCP FTP Client Dependencies</description>
@@ -1206,6 +1285,12 @@
     <description Cclass="CycloneSSL" Cgroup="Hash">Hash Functions</description>
     <description Cclass="CycloneSSL" Cgroup="Groups">Supported Groups</description>
     
+    <description Cclass="CycloneSTP">Spanning Tree Protocol Library</description>
+    <description Cclass="CycloneSTP" Cgroup="MIBs">MIB Bases</description>
+    
+    <description Cclass="CycloneACME">ACME Client Library</description>
+    <description Cclass="CycloneACME" Cgroup="DNS API">DNS API</description>
+    
     <description Cclass="CycloneCrypto">Cryptographic Library</description>
     <description Cclass="CycloneCrypto" Cgroup="Hash">Hash Functions</description>
     <description Cclass="CycloneCrypto" Cgroup="XOF">Extendable-Output Functions</description>
@@ -1226,7 +1311,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="1.9.6">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="1.9.8">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1352,6 +1437,17 @@
         </files>
       </component>
       
+      <component Cgroup="FS Port" Csub="MDK-Pro File System Port" condition="MDK-Pro File System Dependencies">
+        <description>MDK-Pro File System Port</description>
+        <files>
+          <file category="include" name="common/"/>
+          <file category="header" name="common/fs_port.h"/>
+          <file category="header" name="common/fs_port_rl_fs.h"/>
+          <file category="source" name="common/fs_port_rl_fs.c"/>
+          <file category="header" name="config/fs_port_config.h" attr="config" version="1.9.0"/>
+        </files>
+      </component>
+      
       <component Cgroup="Resource Manager" condition="Compiler Dependencies">
         <description>FLASH Resource Manager</description>
         <files>
@@ -1383,7 +1479,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="1.9.6">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="1.9.8">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -1398,6 +1494,7 @@
           <file category="header" name="cyclone_tcp/core/net.h"/>
           <file category="header" name="cyclone_tcp/core/net_legacy.h"/>
           <file category="header" name="cyclone_tcp/core/net_mem.h"/>
+          <file category="header" name="cyclone_tcp/core/net_misc.h"/>
           <file category="header" name="cyclone_tcp/core/nic.h"/>
           <file category="header" name="cyclone_tcp/core/ethernet.h"/>
           <file category="header" name="cyclone_tcp/core/ethernet_misc.h"/>
@@ -1405,6 +1502,7 @@
           
           <file category="source" name="cyclone_tcp/core/net.c"/>
           <file category="source" name="cyclone_tcp/core/net_mem.c"/>
+          <file category="source" name="cyclone_tcp/core/net_misc.c"/>
           <file category="source" name="cyclone_tcp/core/nic.c"/>
           <file category="source" name="cyclone_tcp/core/ethernet.c"/>
           <file category="source" name="cyclone_tcp/core/ethernet_misc.c"/>
@@ -1846,6 +1944,61 @@
           <file category="source" name="cyclone_tcp/coap/coap_client_block.c"/>
           <file category="source" name="cyclone_tcp/coap/coap_client_transport.c"/>
           <file category="source" name="cyclone_tcp/coap/coap_client_misc.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_message.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_option.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_debug.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="CoAP" Csub="CoAP Server" Cvariant="UDP" isDefaultVariant="true" condition="CycloneTCP CoAP Server Dependencies">
+        <description>Non-Secure CoAP Server</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_COAP_SERVER
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/coap/coap_server.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_server_request.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_server_transport.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_server_misc.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_common.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_message.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_option.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_debug.h"/>
+          
+          <file category="source" name="cyclone_tcp/coap/coap_server.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_server_request.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_server_transport.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_server_misc.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_message.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_option.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_debug.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="CoAP" Csub="CoAP Server" Cvariant="DTLS" condition="CycloneTCP CoAP Server DTLS Dependencies">
+        <description>Secure CoAP Server</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_COAP_SERVER
+          #define RTE_CYCLONE_TCP_COAP_SERVER_DTLS
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/coap/coap_server.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_server_request.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_server_transport.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_server_misc.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_common.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_message.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_option.h"/>
+          <file category="header" name="cyclone_tcp/coap/coap_debug.h"/>
+          
+          <file category="source" name="cyclone_tcp/coap/coap_server.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_server_request.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_server_transport.c"/>
+          <file category="source" name="cyclone_tcp/coap/coap_server_misc.c"/>
           <file category="source" name="cyclone_tcp/coap/coap_message.c"/>
           <file category="source" name="cyclone_tcp/coap/coap_option.c"/>
           <file category="source" name="cyclone_tcp/coap/coap_debug.c"/>
@@ -3004,6 +3157,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="RA6M3" condition="CycloneTCP Core Dependencies">
+        <description>Renesas RA6M3 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/ra6m3_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/ra6m3_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="RZA1" condition="CycloneTCP Core Dependencies">
         <description>Renesas RZ/A1 Ethernet MAC controller</description>
         <files>
@@ -3086,7 +3248,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="F28M35x" condition="CycloneTCP Core Dependencies">
-        <description>TI Concerto F28M35x Ethernet controller</description>
+        <description>TI Concerto F28M35x Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/f28m35x_eth_driver.h"/>
@@ -3122,11 +3284,20 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="OMAP-L138" condition="CycloneTCP Core Dependencies">
-        <description>TI OMAP-L138 Ethernet controller</description>
+        <description>TI OMAP-L138 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/omapl138_eth_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/mac/omapl138_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="TMS570" condition="CycloneTCP Core Dependencies">
+        <description>TI TMS570 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/tms570_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/tms570_eth_driver.c"/>
         </files>
       </component>
       
@@ -3365,6 +3536,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="DP83630" condition="CycloneTCP Core Dependencies">
+        <description>TI DP83630 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/dp83630_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/dp83630_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (PHY)" Csub="DP83640" condition="CycloneTCP Core Dependencies">
         <description>TI DP83640 Ethernet PHY transceiver</description>
         <files>
@@ -3401,6 +3581,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Switch)" Csub="MV88E6060" condition="CycloneTCP Core Dependencies">
+        <description>Marvell 88E6060 Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/mv88e6060_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/mv88e6060_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Switch)" Csub="KSZ8463" condition="CycloneTCP Core Dependencies">
         <description>Microchip KSZ8463 Ethernet switch</description>
         <files>
@@ -3419,12 +3608,30 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Switch)" Csub="KSZ8775" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ8775 Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz8775_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz8775_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Switch)" Csub="KSZ8794" condition="CycloneTCP Core Dependencies">
         <description>Microchip KSZ8794 Ethernet switch</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8794_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/switch/ksz8794_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ8795" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ8795 Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz8795_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz8795_driver.c"/>
         </files>
       </component>
       
@@ -3488,6 +3695,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz9893_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/switch/ksz9893_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ9897" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ9897 Gigabit Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz9897_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz9897_driver.c"/>
         </files>
       </component>
       
@@ -3699,6 +3915,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Wi-Fi)" Csub="WF200" condition="CycloneTCP Core Dependencies">
+        <description>Silicon Labs WF200 Wi-Fi controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/wifi/wf200_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/wifi/wf200_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Wi-Fi)" Csub="BCM43362" condition="CycloneTCP Core Dependencies">
         <description>Broadcom BCM43362 Wi-Fi controller</description>
         <files>
@@ -3719,7 +3944,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="1.9.6">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="1.9.8">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -3748,6 +3973,7 @@
           <file category="header" name="cyclone_ssl/tls_misc.h"/>
           <file category="header" name="cyclone_ssl/tls13_common.h"/>
           <file category="header" name="cyclone_ssl/tls13_key_material.h"/>
+          <file category="header" name="cyclone_ssl/tls13_ticket.h"/>
           <file category="header" name="cyclone_ssl/tls13_misc.h"/>
           <file category="header" name="cyclone_ssl/ssl_misc.h"/>
           
@@ -3768,6 +3994,7 @@
           <file category="source" name="cyclone_ssl/tls_misc.c"/>
           <file category="source" name="cyclone_ssl/tls13_common.c"/>
           <file category="source" name="cyclone_ssl/tls13_key_material.c"/>
+          <file category="source" name="cyclone_ssl/tls13_ticket.c"/>
           <file category="source" name="cyclone_ssl/tls13_misc.c"/>
           <file category="source" name="cyclone_ssl/ssl_misc.c"/>
           
@@ -4419,8 +4646,221 @@
       </component>
     </bundle>
     
+    <!-- CycloneSTP -->
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="1.9.8">
+      <description>Spanning Tree Protocol Library</description>
+      <doc></doc>
+      
+      <component Cgroup="Core" condition="CycloneSTP Dependencies">
+        <description>STP Library Core</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_STP
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_stp/"/>
+          <file category="header" name="cyclone_stp/stp/stp_common.h"/>
+          <file category="header" name="config/stp_config.h" attr="config" version="1.9.0"/>
+        </files>
+      </component>
+      
+      <component Cgroup="STP" condition="CycloneSTP STP Dependencies">
+        <description>Spanning Tree Protocol</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_STP_STP
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_stp/"/>
+          
+          <file category="header" name="cyclone_stp/stp/stp.h"/>
+          <file category="header" name="cyclone_stp/stp/stp_mgmt.h"/>
+          <file category="header" name="cyclone_stp/stp/stp_operation.h"/>
+          <file category="header" name="cyclone_stp/stp/stp_procedures.h"/>
+          <file category="header" name="cyclone_stp/stp/stp_conditions.h"/>
+          <file category="header" name="cyclone_stp/stp/stp_bpdu.h"/>
+          <file category="header" name="cyclone_stp/stp/stp_misc.h"/>
+          
+          <file category="source" name="cyclone_stp/stp/stp.c"/>
+          <file category="source" name="cyclone_stp/stp/stp_mgmt.c"/>
+          <file category="source" name="cyclone_stp/stp/stp_operation.c"/>
+          <file category="source" name="cyclone_stp/stp/stp_procedures.c"/>
+          <file category="source" name="cyclone_stp/stp/stp_conditions.c"/>
+          <file category="source" name="cyclone_stp/stp/stp_bpdu.c"/>
+          <file category="source" name="cyclone_stp/stp/stp_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="RSTP" condition="CycloneSTP RSTP Dependencies">
+        <description>Rapid Spanning Tree Protocol</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_STP_RSTP
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_stp/"/>
+          
+          <file category="header" name="cyclone_stp/rstp/rstp.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_mgmt.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_fsm.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_bdm.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_pim.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_ppm.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_prs.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_prt.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_prx.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_pst.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_pti.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_ptx.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_tcm.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_procedures.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_conditions.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_bpdu.h"/>
+          <file category="header" name="cyclone_stp/rstp/rstp_misc.h"/>
+          
+          <file category="source" name="cyclone_stp/rstp/rstp.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_mgmt.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_fsm.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_bdm.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_pim.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_ppm.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_prs.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_prt.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_prx.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_pst.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_pti.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_ptx.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_tcm.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_procedures.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_conditions.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_bpdu.c"/>
+          <file category="source" name="cyclone_stp/rstp/rstp_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="MIBs" Csub="BRIDGE-MIB" condition="CycloneSTP BRIDGE-MIB Dependencies">
+        <description>Standard BRIDGE-MIB Base (RFC 4188)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_STP_BRIDGE_MIB
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_stp/"/>
+          
+          <file category="header" name="cyclone_stp/mibs/bridge_mib_module.h"/>
+          <file category="header" name="cyclone_stp/mibs/bridge_mib_impl.h"/>
+          <file category="header" name="cyclone_stp/mibs/bridge_mib_impl_base.h"/>
+          <file category="header" name="cyclone_stp/mibs/bridge_mib_impl_stp.h"/>
+          <file category="header" name="cyclone_stp/mibs/bridge_mib_impl_tp.h"/>
+          <file category="header" name="cyclone_stp/mibs/bridge_mib_impl_static.h"/>
+          
+          <file category="source" name="cyclone_stp/mibs/bridge_mib_module.c"/>
+          <file category="source" name="cyclone_stp/mibs/bridge_mib_impl.c"/>
+          <file category="source" name="cyclone_stp/mibs/bridge_mib_impl_base.c"/>
+          <file category="source" name="cyclone_stp/mibs/bridge_mib_impl_stp.c"/>
+          <file category="source" name="cyclone_stp/mibs/bridge_mib_impl_tp.c"/>
+          <file category="source" name="cyclone_stp/mibs/bridge_mib_impl_static.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="MIBs" Csub="RSTP-MIB" condition="CycloneSTP RSTP-MIB Dependencies">
+        <description>Standard RSTP-MIB Base (RFC 4318)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_STP_RSTP_MIB
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_stp/"/>
+          
+          <file category="header" name="cyclone_stp/mibs/rstp_mib_module.h"/>
+          <file category="header" name="cyclone_stp/mibs/rstp_mib_impl.h"/>
+          
+          <file category="source" name="cyclone_stp/mibs/rstp_mib_module.c"/>
+          <file category="source" name="cyclone_stp/mibs/rstp_mib_impl.c"/>
+        </files>
+      </component>
+      
+    </bundle>
+   
+   <!-- CycloneACME -->
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="1.9.8">
+      <description>ACME Client Library</description>
+      <doc></doc>
+      
+      <component Cgroup="Core" condition="CycloneACME Dependencies">
+        <description>ACME Library Core</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_acme/"/>
+          <file category="header" name="config/acme_config.h" attr="config" version="1.9.0"/>
+        </files>
+      </component>
+      
+      <component Cgroup="ACME Client" condition="CycloneACME ACME Client Dependencies">
+        <description>ACME Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_ACME_ACME_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_acme/"/>
+          
+          <file category="header" name="cyclone_acme/acme/acme_client.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_directory.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_nonce.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_account.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_order.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_auth.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_challenge.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_certificate.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_jose.h"/>
+          <file category="header" name="cyclone_acme/acme/acme_client_misc.h"/>
+          
+          <file category="source" name="cyclone_acme/acme/acme_client.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_directory.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_nonce.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_account.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_order.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_auth.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_challenge.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_certificate.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_jose.c"/>
+          <file category="source" name="cyclone_acme/acme/acme_client_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="DNS API" Csub="ACME-DNS Client" Cvariant="TCP" isDefaultVariant="true" condition="CycloneACME ACME-DNS Client Dependencies">
+        <description>Non-Secure ACME-DNS Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_ACME_ACME_DNS_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_acme/"/>
+          
+          <file category="header" name="cyclone_acme/dns_api/acme_dns_client.h"/>
+          <file category="header" name="cyclone_acme/dns_api/acme_dns_client_misc.h"/>
+          
+          <file category="source" name="cyclone_acme/dns_api/acme_dns_client.c"/>
+          <file category="source" name="cyclone_acme/dns_api/acme_dns_client_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="DNS API" Csub="ACME-DNS Client" Cvariant="TLS" condition="CycloneACME ACME-DNS Client TLS Dependencies">
+        <description>Secure ACME-DNS Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_ACME_ACME_DNS_CLIENT
+          #define RTE_CYCLONE_ACME_ACME_DNS_CLIENT_TLS
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_acme/"/>
+          
+          <file category="header" name="cyclone_acme/dns_api/acme_dns_client.h"/>
+          <file category="header" name="cyclone_acme/dns_api/acme_dns_client_misc.h"/>
+          
+          <file category="source" name="cyclone_acme/dns_api/acme_dns_client.c"/>
+          <file category="source" name="cyclone_acme/dns_api/acme_dns_client_misc.c"/>
+        </files>
+      </component>
+    </bundle>
+    
     <!-- CycloneCrypto -->
-    <bundle Cbundle="CycloneCrypto" Cclass="CycloneCrypto" Cversion="1.9.6">
+    <bundle Cbundle="CycloneCrypto" Cclass="CycloneCrypto" Cversion="1.9.8">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -5666,7 +6106,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -5687,7 +6126,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -5708,7 +6146,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -5751,7 +6188,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -5774,7 +6210,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -5858,7 +6293,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -5984,7 +6418,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6027,7 +6460,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6048,7 +6480,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6069,7 +6500,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6090,7 +6520,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6102,7 +6531,7 @@
     
     <!-- FTP Server Demo (STM32439I-EVAL) -->
     <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32439i_eval/ftp_server_demo">
-      <description>FTP server demo (CycloneTCP, FatFs and CMSIS-RTOS)</description>
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS and FatFs)</description>
       <board name="STM32439I-EVAL" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftp_server_demo.uvprojx"/>
@@ -6122,7 +6551,7 @@
     
     <!-- FTPS Server Demo (STM32439I-EVAL) -->
     <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32439i_eval/ftps_server_demo">
-      <description>FTPS server demo (CycloneTCP, CycloneSSL, FatFs and CMSIS-RTOS)</description>
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS and FatFs)</description>
       <board name="STM32439I-EVAL" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftps_server_demo.uvprojx"/>
@@ -6154,7 +6583,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6220,7 +6648,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6270,7 +6697,7 @@
     
     <!-- FTP Server Demo (STM32F746G-Discovery) -->
     <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/ftp_server_demo">
-      <description>FTP server demo (CycloneTCP, FatFs and CMSIS-RTOS)</description>
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS and FatFs)</description>
       <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftp_server_demo.uvprojx"/>
@@ -6290,7 +6717,7 @@
     
     <!-- FTPS Server Demo (STM32F746G-Discovery) -->
     <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/ftps_server_demo">
-      <description>FTPS server demo (CycloneTCP, CycloneSSL, FatFs and CMSIS-RTOS)</description>
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS and FatFs)</description>
       <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftps_server_demo.uvprojx"/>
@@ -6322,7 +6749,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6366,7 +6792,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6378,7 +6803,7 @@
     
     <!-- FTP Server Demo (STM32756G-EVAL) -->
     <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32756g_eval/ftp_server_demo">
-      <description>FTP server demo (CycloneTCP, FatFs and CMSIS-RTOS)</description>
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS and FatFs)</description>
       <board name="STM32756G-EVAL" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftp_server_demo.uvprojx"/>
@@ -6407,7 +6832,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6419,7 +6843,7 @@
     
     <!-- FTP Server Demo (STM32F769I-Discovery) -->
     <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/ftp_server_demo">
-      <description>FTP server demo (CycloneTCP, FatFs and CMSIS-RTOS)</description>
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS and FatFs)</description>
       <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftp_server_demo.uvprojx"/>
@@ -6439,7 +6863,7 @@
     
     <!-- FTPS Server Demo (STM32F769I-Discovery) -->
     <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/ftps_server_demo">
-      <description>FTPS server demo (CycloneTCP, CycloneSSL, FatFs and CMSIS-RTOS)</description>
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS and FatFs)</description>
       <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftps_server_demo.uvprojx"/>
@@ -6471,7 +6895,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6506,7 +6929,7 @@
     
     <!-- FTP Server Demo (STM32F769I-EVAL) -->
     <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_eval/ftp_server_demo">
-      <description>FTP server demo (CycloneTCP, FatFs and CMSIS-RTOS)</description>
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS and FatFs)</description>
       <board name="STM32F769I-EVAL" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftp_server_demo.uvprojx"/>
@@ -6535,7 +6958,26 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>Server</keyword>
+        <keyword>Web Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTP Server Demo (Nucleo-H743ZI) -->
+    <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/nucleo_h743zi/http_server_demo">
+      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="NUCLEO-H743ZI" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="http_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6556,7 +6998,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6587,6 +7028,51 @@
       </attributes>
     </example>
     
+    <!-- FTP Server Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/ftp_server_demo">
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ftp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="File System" Cgroup="CORE"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
+    <!-- FTPS Server Demo (STM32H743I-EVAL) -->
+    <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/ftps_server_demo">
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ftps_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="File System" Cgroup="CORE"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>FTPS</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
     <!-- HTTP Client Demo (STM32H743I-EVAL) -->
     <example name="CycloneTCP HTTP Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/http_client_demo">
       <description>HTTP client demo (CycloneTCP and CMSIS-RTOS2)</description>
@@ -6598,7 +7084,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6640,7 +7125,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6706,7 +7190,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6727,7 +7210,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6768,10 +7250,9 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
-	<keyword>VLAN</keyword>
+        <keyword>VLAN</keyword>
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>Server</keyword>
@@ -6790,7 +7271,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6856,7 +7336,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6879,7 +7358,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6922,7 +7400,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6945,7 +7422,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
@@ -6988,7 +7464,6 @@
         <component Cclass="CMSIS" Cgroup="CORE"/>
         <component Cclass="CMSIS" Cgroup="RTOS"/>
         <component Cclass="CycloneTCP"/>
-        <component Cclass="CycloneSSL"/>
         <category>Middleware</category>
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
