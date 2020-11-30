@@ -16,7 +16,7 @@
       - Added cSHAKE128 and cSHAKE256 XOF functions
       - Added KMAC128 and KMAC256 message authentication code
       - Added Trivium stream cipher
-      - Support for Realtek LAN8770 Ethernet PHY (100Base-T1)
+      - Support for Microchip LAN8770 Ethernet PHY (100Base-T1)
     </release>
     <release version="1.9.8" date="2020-07-16">
       - New ACME client library (CycloneACME)
