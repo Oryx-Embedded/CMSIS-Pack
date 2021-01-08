@@ -10,6 +10,13 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.0.2" date="2021-01-08">
+      - SCP client/server implementation (CycloneSSH)
+      - Added support of Encrypt-then-MAC (EtM) construction (CycloneSSH)
+      - Added SSH secure shell server examples
+      - Ethernet MAC driver for Infineon XMC4400 and NXP LPC54018
+      - Added support for Microchip KSZ9131 and Intel PEF7071 Gigabit Ethernet PHYs
+    </release>
     <release version="2.0.0" date="2020-11-05">
       - New SSH client/server library (CycloneSSH)
       - SFTP client/server implementation. Part of CycloneSSH
@@ -1092,12 +1099,28 @@
       <description>CycloneSSH Core Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="Core"/>
     </condition>
+    <condition id="CycloneSSH SCP Client Dependencies">
+      <description>CycloneSSH SCP Client Dependencies</description>
+      <require Cclass="CycloneSSH" Cgroup="SSH Client"/>
+    </condition>
+    <condition id="CycloneSSH SCP Server Dependencies">
+      <description>CycloneSSH SCP Server Dependencies</description>
+      <require Cclass="CycloneSSH" Cgroup="SSH Server"/>
+    </condition>
     <condition id="CycloneSSH SFTP Client Dependencies">
       <description>CycloneSSH SFTP Client Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="SSH Client"/>
     </condition>
     <condition id="CycloneSSH SFTP Server Dependencies">
       <description>CycloneSSH SFTP Server Dependencies</description>
+      <require Cclass="CycloneSSH" Cgroup="SSH Server"/>
+    </condition>
+    <condition id="CycloneSSH Shell Client Dependencies">
+      <description>CycloneSSH Shell Client Dependencies</description>
+      <require Cclass="CycloneSSH" Cgroup="SSH Client"/>
+    </condition>
+    <condition id="CycloneSSH Shell Server Dependencies">
+      <description>CycloneSSH Shell Server Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="SSH Server"/>
     </condition>
     <condition id="CycloneSSH Diffie-Hellman Dependencies">
@@ -1149,11 +1172,13 @@
       <description>CycloneSSH CBC Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="Core"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher Mode" Csub="CBC"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
     </condition>
     <condition id="CycloneSSH CTR Dependencies">
       <description>CycloneSSH CTR Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="Core"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher Mode" Csub="CTR"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
     </condition>
     <condition id="CycloneSSH GCM Dependencies">
       <description>CycloneSSH GCM Dependencies</description>
@@ -1170,6 +1195,7 @@
       <description>CycloneSSH RC4 Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="Core"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="RC4"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
     </condition>
     <condition id="CycloneSSH IDEA Dependencies">
       <description>CycloneSSH IDEA Dependencies</description>
@@ -1467,7 +1493,9 @@
     <description Cclass="CycloneSSL" Cgroup="Groups">Supported Groups</description>
     
     <description Cclass="CycloneSSH">SSH Library</description>
+    <description Cclass="CycloneSSH" Cgroup="SCP">SCP Protocol</description>
     <description Cclass="CycloneSSH" Cgroup="SFTP">SFTP Protocol</description>
+    <description Cclass="CycloneSSH" Cgroup="Shell">Secure Shell</description>
     <description Cclass="CycloneSSH" Cgroup="Authentication">Authentication Methods</description>
     <description Cclass="CycloneSSH" Cgroup="Key Exchange">Key Exchange Algorithms</description>
     <description Cclass="CycloneSSH" Cgroup="Signature">Signature Algorithms</description>
@@ -1503,7 +1531,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.0.0">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.0.2">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1671,7 +1699,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.0.0">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.0.2">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -3129,6 +3157,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="XMC4400" condition="CycloneTCP Core Dependencies">
+        <description>Infineon XMC4400 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/xmc4400_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/xmc4400_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="XMC4500" condition="CycloneTCP Core Dependencies">
         <description>Infineon XMC4500 Ethernet MAC controller</description>
         <files>
@@ -3246,12 +3283,12 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="LPC546xx" condition="CycloneTCP Core Dependencies">
-        <description>NXP LPC546xx Ethernet MAC controller</description>
+      <component Cgroup="Drivers (MAC)" Csub="LPC54xxx" condition="CycloneTCP Core Dependencies">
+        <description>NXP LPC54xxx Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/lpc546xx_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/lpc546xx_eth_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/lpc54xxx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/lpc54xxx_eth_driver.c"/>
         </files>
       </component>      
       
@@ -3539,6 +3576,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="PEF7071" condition="CycloneTCP Core Dependencies">
+        <description>Intel PEF7071 Gigabit Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/pef7071_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/pef7071_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (PHY)" Csub="MV88E1512" condition="CycloneTCP Core Dependencies">
         <description>Marvell 88E1512 Gigabit Ethernet PHY transceiver</description>
         <files>
@@ -3617,6 +3663,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz9031_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/phy/ksz9031_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="KSZ9131" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ9131 Gigabit Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/ksz9131_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/ksz9131_driver.c"/>
         </files>
       </component>
       
@@ -4145,7 +4200,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.0.0">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.0.2">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -4848,7 +4903,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.0.0">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.0.2">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -4929,6 +4984,46 @@
         </files>
       </component>
       
+      <component Cgroup="SCP" Csub="SCP Client" condition="CycloneSSH SCP Client Dependencies">
+        <description>SCP Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSH_SCP_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ssh/"/>
+          
+          <file category="header" name="cyclone_ssh/scp/scp_client.h"/>
+          <file category="header" name="cyclone_ssh/scp/scp_client_misc.h"/>
+          <file category="header" name="cyclone_ssh/scp/scp_common.h"/>
+          
+          <file category="source" name="cyclone_ssh/scp/scp_client.c"/>
+          <file category="source" name="cyclone_ssh/scp/scp_client_misc.c"/>
+          <file category="source" name="cyclone_ssh/scp/scp_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="SCP" Csub="SCP Server" condition="CycloneSSH SCP Server Dependencies">
+        <description>SCP Server</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSH_SCP_SERVER
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ssh/"/>
+          
+          <file category="header" name="cyclone_ssh/scp/scp_server.h"/>
+          <file category="header" name="cyclone_ssh/scp/scp_server_file.h"/>
+          <file category="header" name="cyclone_ssh/scp/scp_server_directory.h"/>
+          <file category="header" name="cyclone_ssh/scp/scp_server_misc.h"/>
+          <file category="header" name="cyclone_ssh/scp/scp_common.h"/>
+          
+          <file category="source" name="cyclone_ssh/scp/scp_server.c"/>
+          <file category="source" name="cyclone_ssh/scp/scp_server_file.c"/>
+          <file category="source" name="cyclone_ssh/scp/scp_server_directory.c"/>
+          <file category="source" name="cyclone_ssh/scp/scp_server_misc.c"/>
+          <file category="source" name="cyclone_ssh/scp/scp_common.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="SFTP" Csub="SFTP Client" condition="CycloneSSH SFTP Client Dependencies">
         <description>SFTP Client</description>
         <RTE_Components_h>
@@ -4970,6 +5065,40 @@
           <file category="source" name="cyclone_ssh/sftp/sftp_server_packet.c"/>
           <file category="source" name="cyclone_ssh/sftp/sftp_server_misc.c"/>
           <file category="source" name="cyclone_ssh/sftp/sftp_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Shell" Csub="Shell Client" condition="CycloneSSH Shell Client Dependencies">
+        <description>Secure Shell Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSH_SHELL_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ssh/"/>
+          
+          <file category="header" name="cyclone_ssh/shell/shell_client.h"/>
+          <file category="header" name="cyclone_ssh/shell/shell_client_misc.h"/>
+          
+          <file category="source" name="cyclone_ssh/shell/shell_client.c"/>
+          <file category="source" name="cyclone_ssh/shell/shell_client_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Shell" Csub="Shell Server" condition="CycloneSSH Shell Server Dependencies">
+        <description>Secure Shell Server</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSH_SHELL_SERVER
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ssh/"/>
+          
+          <file category="header" name="cyclone_ssh/shell/shell_server.h"/>
+          <file category="header" name="cyclone_ssh/shell/shell_server_pty.h"/>
+          <file category="header" name="cyclone_ssh/shell/shell_server_misc.h"/>
+          
+          <file category="source" name="cyclone_ssh/shell/shell_server.c"/>
+          <file category="source" name="cyclone_ssh/shell/shell_server_pty.c"/>
+          <file category="source" name="cyclone_ssh/shell/shell_server_misc.c"/>
         </files>
       </component>
       
@@ -5261,7 +5390,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.0.0">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.0.2">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -5392,7 +5521,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.0.0">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.0.2">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -5474,7 +5603,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.0.0">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.0.2">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -6771,9 +6900,27 @@
       </attributes>
     </example>
     
+    <!-- TCP Client Demo (FRDM-K64F) -->
+    <example name="CycloneTCP TCP Client Demo" doc="abstract.txt" folder="demo/frdm_k64f/tcp_client_demo">
+      <description>TCP client demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="FRDM-K64F" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="tcp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
     <!-- HTTP Server Demo (FRDM-K64F) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/frdm_k64f/http_server_demo">
-      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
+      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS2)</description>
       <board name="FRDM-K64F" vendor="NXP"/>
       <project>
         <environment name="uv" load="http_server_demo.uvprojx"/>
@@ -6792,7 +6939,7 @@
     
     <!-- MQTT Client Demo (FRDM-K64F) -->
     <example name="CycloneTCP MQTT Client Demo" doc="abstract.txt" folder="demo/frdm_k64f/mqtt_client_demo">
-      <description>MQTT Client demo (CycloneTCP and CMSIS-RTOS)</description>
+      <description>MQTT Client demo (CycloneTCP and CMSIS-RTOS2)</description>
       <board name="FRDM-K64F" vendor="NXP"/>
       <project>
         <environment name="uv" load="mqtt_client_demo.uvprojx"/>
@@ -6814,7 +6961,7 @@
     
     <!-- SNMP Agent Demo (FRDM-K64F) -->
     <example name="CycloneTCP SNMP Agent Demo" doc="abstract.txt" folder="demo/frdm_k64f/snmp_agent_demo">
-      <description>SNMP Agent demo (CycloneTCP and CMSIS-RTOS)</description>
+      <description>SNMP Agent demo (CycloneTCP and CMSIS-RTOS2)</description>
       <board name="FRDM-K64F" vendor="NXP"/>
       <project>
         <environment name="uv" load="snmp_agent_demo.uvprojx"/>
@@ -7323,7 +7470,7 @@
     
     <!-- FTP Server Demo (STM32F746G-Discovery) -->
     <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/ftp_server_demo">
-      <description>FTP server demo (CycloneTCP, CMSIS-RTOS and FatFs)</description>
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS2 and MDK-Pro File System)</description>
       <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftp_server_demo.uvprojx"/>
@@ -7343,7 +7490,7 @@
     
     <!-- FTPS Server Demo (STM32F746G-Discovery) -->
     <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/ftps_server_demo">
-      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS and FatFs)</description>
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS2 and MDK-Pro File System)</description>
       <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftps_server_demo.uvprojx"/>
@@ -7366,7 +7513,7 @@
     
     <!-- HTTP Server Demo (STM32F746G-Discovery) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/http_server_demo">
-      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
+      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS2)</description>
       <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="http_server_demo.uvprojx"/>
@@ -7385,7 +7532,7 @@
     
     <!-- HTTPS Server Demo (STM32F746G-Discovery) -->
     <example name="CycloneTCP HTTPS Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/https_server_demo">
-      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS)</description>
+      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
       <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="https_server_demo.uvprojx"/>
@@ -7408,7 +7555,7 @@
     
     <!-- SNMP Agent Demo (STM32F746G-Discovery) -->
     <example name="CycloneTCP SNMP Agent Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/snmp_agent_demo">
-      <description>SNMP Agent demo (CycloneTCP and CMSIS-RTOS)</description>
+      <description>SNMP Agent demo (CycloneTCP and CMSIS-RTOS2)</description>
       <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="snmp_agent_demo.uvprojx"/>
@@ -7422,6 +7569,71 @@
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
         <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SSH Server Demo (STM32F746G-Discovery) -->
+    <example name="CycloneSSH SSH Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/ssh_server_demo">
+      <description>SSH server demo (CycloneTCP, CycloneSSH and CMSIS-RTOS2)</description>
+      <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ssh_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>Shell</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SCP Server Demo (STM32F746G-Discovery) -->
+    <example name="CycloneSSH SCP Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/scp_server_demo">
+      <description>SCP server demo (CycloneTCP, CycloneSSH, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="scp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SCP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SFTP Server Demo (STM32F746G-Discovery) -->
+    <example name="CycloneSSH SFTP Server Demo" doc="abstract.txt" folder="demo/stm32f746g_discovery/sftp_server_demo">
+      <description>SFTP server demo (CycloneTCP, CycloneSSH, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="STM32F746G-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="sftp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SFTP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
       </attributes>
     </example>
     
@@ -7466,7 +7678,7 @@
     
     <!-- FTP Server Demo (STM32F769I-Discovery) -->
     <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/ftp_server_demo">
-      <description>FTP server demo (CycloneTCP, CMSIS-RTOS and FatFs)</description>
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS2 and MDK-Pro File System)</description>
       <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftp_server_demo.uvprojx"/>
@@ -7480,13 +7692,13 @@
         <keyword>TCP</keyword>
         <keyword>FTP</keyword>
         <keyword>Server</keyword>
-        <keyword>FatFs</keyword>
+        <keyword>MDK-Pro File System</keyword>
       </attributes>
     </example>
     
     <!-- FTPS Server Demo (STM32F769I-Discovery) -->
     <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/ftps_server_demo">
-      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS and FatFs)</description>
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS2 and MDK-Pro File System)</description>
       <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="ftps_server_demo.uvprojx"/>
@@ -7503,13 +7715,13 @@
         <keyword>FTPS</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
-        <keyword>FatFs</keyword>
+        <keyword>MDK-Pro File System</keyword>
       </attributes>
     </example>
     
     <!-- HTTP Server Demo (STM32F769I-Discovery) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/http_server_demo">
-      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
+      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS2)</description>
       <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="http_server_demo.uvprojx"/>
@@ -7528,7 +7740,7 @@
     
     <!-- HTTPS Server Demo (STM32F769I-Discovery) -->
     <example name="CycloneTCP HTTPS Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/https_server_demo">
-      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS)</description>
+      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
       <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
       <project>
         <environment name="uv" load="https_server_demo.uvprojx"/>
@@ -7546,6 +7758,71 @@
         <keyword>HTTPS</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SSH Server Demo (STM32F769I-Discovery) -->
+    <example name="CycloneSSH SSH Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/ssh_server_demo">
+      <description>SSH server demo (CycloneTCP, CycloneSSH and CMSIS-RTOS2)</description>
+      <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ssh_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>Shell</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SCP Server Demo (STM32F769I-Discovery) -->
+    <example name="CycloneSSH SCP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/scp_server_demo">
+      <description>SCP server demo (CycloneTCP, CycloneSSH, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="scp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SCP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SFTP Server Demo (STM32F769I-Discovery) -->
+    <example name="CycloneSSH SFTP Server Demo" doc="abstract.txt" folder="demo/stm32f769i_discovery/sftp_server_demo">
+      <description>SFTP server demo (CycloneTCP, CycloneSSH, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="STM32F769I-Discovery" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="sftp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SFTP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
       </attributes>
     </example>
     
@@ -7856,6 +8133,70 @@
         <keyword>TCP</keyword>
         <keyword>WebSocket</keyword>
         <keyword>TLS</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SSH Server Demo (STM32H743I-EVAL) -->
+    <example name="CycloneSSH SSH Server Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/ssh_server_demo">
+      <description>SSH server demo (CycloneTCP, CycloneSSH and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="ssh_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>Shell</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SCP Client Demo (STM32H743I-EVAL) -->
+    <example name="CycloneSSH SCP Client Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/scp_client_demo">
+      <description>SCP client demo (CycloneTCP, CycloneSSH and CMSIS-RTOS2)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="scp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>SCP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SCP Server Demo (STM32H743I-EVAL) -->
+    <example name="CycloneSSH SCP Server Demo" doc="abstract.txt" folder="demo/stm32h743i_eval/scp_server_demo">
+      <description>SCP server demo (CycloneTCP, CycloneSSH, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="STM32H743I-EVAL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="scp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="File System" Cgroup="CORE"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>SCP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
       </attributes>
     </example>
     
