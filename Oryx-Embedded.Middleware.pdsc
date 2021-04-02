@@ -10,9 +10,17 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.0.4" date="2021-04-02">
+      - Added support for TCP keep-alive mechanism
+      - Ethernet MAC driver for i.MX RT1170
+      - Modified Tiva TM4C129 and MSP432E4 driver to support external PHY or switch
+      - Added driver for DP83825 Ethernet PHY
+      - Added driver for KSZ8565, KSZ8567 and KSZ9896 Ethernet switches
+      - SSH, SCP and SFTP clients now allow RTOS-less operation
+    </release>
     <release version="2.0.2" date="2021-01-08">
       - SCP client/server implementation (CycloneSSH)
-      - Added support of Encrypt-then-MAC (EtM) construction (CycloneSSH)
+      - Added support for Encrypt-then-MAC (EtM) construction (CycloneSSH)
       - Added SSH secure shell server examples
       - Ethernet MAC driver for Infineon XMC4400 and NXP LPC54018
       - Added support for Microchip KSZ9131 and Intel PEF7071 Gigabit Ethernet PHYs
@@ -1531,7 +1539,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.0.2">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.0.4">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1699,7 +1707,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.0.2">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.0.4">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -1773,10 +1781,12 @@
           <file category="include" name="cyclone_tcp/"/>
           
           <file category="header" name="cyclone_tcp/core/socket.h"/>
+          <file category="header" name="cyclone_tcp/core/socket_misc.h"/>
           <file category="header" name="cyclone_tcp/core/bsd_socket.h"/>
           <file category="header" name="cyclone_tcp/core/raw_socket.h"/>
           
           <file category="source" name="cyclone_tcp/core/socket.c"/>
+          <file category="source" name="cyclone_tcp/core/socket_misc.c"/>
           <file category="source" name="cyclone_tcp/core/bsd_socket.c"/>
           <file category="source" name="cyclone_tcp/core/raw_socket.c"/>
         </files>
@@ -3139,6 +3149,19 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="FM3" condition="CycloneTCP Core Dependencies">
+        <description>Cypress FM3 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/drivers/mac/fm3_eth1_driver.h"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/fm3_eth2_driver.h"/>
+          
+          <file category="source" name="cyclone_tcp/drivers/mac/fm3_eth1_driver.c"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/fm3_eth2_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="FM4" condition="CycloneTCP Core Dependencies">
         <description>Cypress FM4 Ethernet MAC controller</description>
         <files>
@@ -3341,8 +3364,25 @@
         <description>NXP i.MX RT1060 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1060_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1060_eth_driver.c"/>
+          
+          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1060_eth1_driver.h"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1060_eth2_driver.h"/>
+          
+          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1060_eth1_driver.c"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1060_eth2_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="i.MX RT1170" condition="CycloneTCP Core Dependencies">
+        <description>NXP i.MX RT1170 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1170_eth1_driver.h"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mimxrt1170_eth2_driver.h"/>
+          
+          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1170_eth1_driver.c"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mimxrt1170_eth2_driver.c"/>
         </files>
       </component>
       
@@ -3381,17 +3421,21 @@
         <description>Renesas Synergy S7G2 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/s7g2_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/s7g2_eth_driver.c"/>
+          
+          <file category="header" name="cyclone_tcp/drivers/mac/s7g2_eth1_driver.h"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/s7g2_eth2_driver.h"/>
+          
+          <file category="source" name="cyclone_tcp/drivers/mac/s7g2_eth1_driver.c"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/s7g2_eth2_driver.c"/>
         </files>
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="RA6M3" condition="CycloneTCP Core Dependencies">
-        <description>Renesas RA6M3 Ethernet MAC controller</description>
+        <description>Renesas RA6 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/ra6m3_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/ra6m3_eth_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/ra6_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/ra6_eth_driver.c"/>
         </files>
       </component>
       
@@ -3819,6 +3863,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="DP83825" condition="CycloneTCP Core Dependencies">
+        <description>TI DP83825 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/dp83825_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/dp83825_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (PHY)" Csub="DP83848" condition="CycloneTCP Core Dependencies">
         <description>TI DP83848 Ethernet PHY transceiver</description>
         <files>
@@ -3861,6 +3914,24 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz8563_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/switch/ksz8563_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ8565" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ8565 Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz8565_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz8565_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ8567" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ8567 Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz8567_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz8567_driver.c"/>
         </files>
       </component>
       
@@ -3951,6 +4022,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/ksz9893_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/switch/ksz9893_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="KSZ9896" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ9896 Gigabit Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz9896_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz9896_driver.c"/>
         </files>
       </component>
       
@@ -4200,7 +4280,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.0.2">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.0.4">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -4903,7 +4983,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.0.2">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.0.4">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -5109,7 +5189,7 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_ssh/"/>
-          <file category="source" name="cyclone_ssh/ssh/ssh_auth_password.h"/>
+          <file category="header" name="cyclone_ssh/ssh/ssh_auth_password.h"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_auth_password.c"/>
         </files>
       </component>
@@ -5121,7 +5201,7 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_ssh/"/>
-          <file category="source" name="cyclone_ssh/ssh/ssh_auth_public_key.h"/>
+          <file category="header" name="cyclone_ssh/ssh/ssh_auth_public_key.h"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_auth_public_key.c"/>
         </files>
       </component>
@@ -5390,7 +5470,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.0.2">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.0.4">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -5521,7 +5601,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.0.2">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.0.4">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -5603,7 +5683,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.0.2">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.0.4">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -6981,6 +7061,304 @@
       </attributes>
     </example>
     
+    <!-- FTP Client Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP FTP Client Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/ftp_client_demo">
+      <description>FTP client demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="ftp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- FTPS Client Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP FTPS Client Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/ftps_client_demo">
+      <description>FTPS client demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="ftps_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>FTPS</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- FTP Server Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP FTP Server Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/ftp_server_demo">
+      <description>FTP server demo (CycloneTCP, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="ftp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
+    <!-- FTPS Server Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP FTPS Server Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/ftps_server_demo">
+      <description>FTPS server demo (CycloneTCP, CycloneSSL, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="ftps_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>FTP</keyword>
+        <keyword>FTPS</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTP Client Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP HTTP Client Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/http_client_demo">
+      <description>HTTP client demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="http_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTPS Client Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP HTTPS Client Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/https_client_demo">
+      <description>HTTPS client demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="https_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTP Server Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/http_server_demo">
+      <description>HTTP server demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="http_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTPS Server Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP HTTPS Server Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/https_server_demo">
+      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="https_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SNMP Agent Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneTCP SNMP Agent Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/snmp_agent_demo">
+      <description>SNMP Agent demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="snmp_agent_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SNMP</keyword>
+        <keyword>Agent</keyword>
+        <keyword>SNMPv1</keyword>
+        <keyword>SNMPv2c</keyword>
+        <keyword>SNMPv3</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SSH Server Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneSSH SSH Server Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/ssh_server_demo">
+      <description>SSH server demo (CycloneTCP, CycloneSSH and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="ssh_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>Shell</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SCP Client Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneSSH SCP Client Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/scp_client_demo">
+      <description>SCP client demo (CycloneTCP, CycloneSSH and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="scp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>SCP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SCP Server Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneSSH SCP Server Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/scp_server_demo">
+      <description>SCP server demo (CycloneTCP, CycloneSSH, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="scp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SCP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SFTP Client Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneSSH SFTP Client Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/sftp_client_demo">
+      <description>SFTP client demo (CycloneTCP, CycloneSSH and CMSIS-RTOS2)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="sftp_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>SFTP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- SFTP Server Demo (MIMXRT1064-EVK) -->
+    <example name="CycloneSSH SFTP Server Demo" doc="abstract.txt" folder="demo/mimxrt1064_evk/sftp_server_demo">
+      <description>SFTP server demo (CycloneTCP, CycloneSSH, CMSIS-RTOS2 and MDK-Pro File System)</description>
+      <board name="EVK-MIMXRT1064" vendor="NXP"/>
+      <project>
+        <environment name="uv" load="sftp_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSH"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>SFTP</keyword>
+        <keyword>SSH</keyword>
+        <keyword>Server</keyword>
+        <keyword>MDK-Pro File System</keyword>
+      </attributes>
+    </example>
+    
     <!-- HTTP Server Demo (MCBSTM32F200) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/mcbstm32f200/http_server_demo">
       <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
@@ -7484,7 +7862,7 @@
         <keyword>TCP</keyword>
         <keyword>FTP</keyword>
         <keyword>Server</keyword>
-        <keyword>FatFs</keyword>
+        <keyword>MDK-Pro File System</keyword>
       </attributes>
     </example>
     
@@ -7507,7 +7885,7 @@
         <keyword>FTPS</keyword>
         <keyword>TLS</keyword>
         <keyword>Server</keyword>
-        <keyword>FatFs</keyword>
+        <keyword>MDK-Pro File System</keyword>
       </attributes>
     </example>
     
