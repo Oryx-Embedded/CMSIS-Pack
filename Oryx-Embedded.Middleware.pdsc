@@ -10,6 +10,21 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.1.0" date="2021-07-23">
+      - Added IGMPv2 router and IGMP snooping implementations
+      - DP83826 Ethernet PHY driver
+      - Added stop APIs for CoAP server, SNMP agent and TFT server
+      - Added support for IP_TOS option (BSD socket API)
+      - New callback mechanism for DHCP client that allows parsing/formatting of custom DHCP options
+      - Dropped SSL 3.0 from CycloneSSL code base
+      - Support for for Silabs EFM32GG11 hardware cryptographic accelerator (TRNG and CRYPTO peripherals)
+      - Support for NXP K60, K64, K65, K66 and KV5x hardware cryptographic accelerator (TRNG and MMCAU peripherals)
+      - Support for NXP i.MX RT1050 and i.MX RT1060 hardware cryptographic accelerator (TRNG and DCP peripherals)
+      - Support for Renesas RA6M2 and RA6M3 hardware cryptographic accelerator (SCE7 peripheral)
+      - Support for Microchip/Atmel SAM L11 hardware cryptographic accelerator (TRNG and CRYA peripherals)
+      - Support for STM32F2/F4/F7/H7 hardware cryptographic accelerator (TRNG, HASH and CRYP peripherals)
+      - Support for STM32L4 hardware cryptographic accelerator (TRNG, HASH and AES peripherals)
+    </release>
     <release version="2.0.4" date="2021-04-02">
       - Added support for TCP keep-alive mechanism
       - Ethernet MAC driver for i.MX RT1170
@@ -457,12 +472,20 @@
       <description>CycloneTCP Core Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="Core"/>
     </condition>
-    <condition id="CycloneTCP IGMP Dependencies">
-      <description>CycloneTCP IGMP Dependencies</description>
-      <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
-    </condition>
     <condition id="CycloneTCP Auto-IP Dependencies">
       <description>CycloneTCP Auto-IP Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
+    </condition>
+    <condition id="CycloneTCP IGMP Host Dependencies">
+      <description>CycloneTCP IGMP Host Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
+    </condition>
+    <condition id="CycloneTCP IGMP Router Dependencies">
+      <description>CycloneTCP IGMP Router Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
+    </condition>
+    <condition id="CycloneTCP IGMP Snooping Dependencies">
+      <description>CycloneTCP IGMP Snooping Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
     </condition>
     <condition id="CycloneTCP MLD Dependencies">
@@ -1461,6 +1484,7 @@
     
     <description Cclass="CycloneTCP">Dual IPv4/IPv6 Stack</description>
     <description Cclass="CycloneTCP" Cgroup="IPv4">IPv4 Protocol</description>
+    <description Cclass="CycloneTCP" Cgroup="IGMP">IGMP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="IPv6">IPv6 Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="DHCP">DHCP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="DHCPv6">DHCPv6 Protocol</description>
@@ -1533,13 +1557,14 @@
     <description Cclass="CycloneCRYPTO" Cgroup="RNG">Random Number Generators</description>
     <description Cclass="CycloneCRYPTO" Cgroup="Encoding">Data Encoding Schemes</description>
     <description Cclass="CycloneCRYPTO" Cgroup="PKIX">Public-Key Infrastructure (X.509)</description>
+    <description Cclass="CycloneCRYPTO" Cgroup="Hardware">Hardware Cryptographic Accelerators</description>
   </taxonomy>
   
   <!-- Components section -->
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.0.4">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.1.0">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1562,7 +1587,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_none.h"/>
           <file category="source" name="common/os_port_none.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1573,7 +1598,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_chibios.h"/>
           <file category="source" name="common/os_port_chibios.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1584,7 +1609,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_cmsis_rtos.h"/>
           <file category="source" name="common/os_port_cmsis_rtos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1595,7 +1620,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_cmsis_rtos2.h"/>
           <file category="source" name="common/os_port_cmsis_rtos2.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1606,7 +1631,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_embos.h"/>
           <file category="source" name="common/os_port_embos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1617,7 +1642,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_freertos.h"/>
           <file category="source" name="common/os_port_freertos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1628,7 +1653,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_rtx.h"/>
           <file category="source" name="common/os_port_rtx.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1639,7 +1664,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_ucos3.h"/>
           <file category="source" name="common/os_port_ucos3.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1650,7 +1675,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_ucos3.h"/>
           <file category="source" name="common/os_port_ucos3.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1661,7 +1686,7 @@
           <file category="header" name="common/fs_port.h"/>
           <file category="header" name="common/fs_port_fatfs.h"/>
           <file category="source" name="common/fs_port_fatfs.c"/>
-          <file category="header" name="config/fs_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/fs_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1672,7 +1697,7 @@
           <file category="header" name="common/fs_port.h"/>
           <file category="header" name="common/fs_port_rl_fs.h"/>
           <file category="source" name="common/fs_port_rl_fs.c"/>
-          <file category="header" name="config/fs_port_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/fs_port_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1707,7 +1732,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.0.4">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.1.0">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -1736,7 +1761,7 @@
           <file category="source" name="cyclone_tcp/core/ethernet_misc.c"/>
           <file category="source" name="cyclone_tcp/core/ip.c"/>
           
-          <file category="header" name="config/net_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/net_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -1817,18 +1842,6 @@
         </files>
       </component>
       
-      <component Cgroup="IPv4" Csub="IGMP" condition="CycloneTCP IGMP Dependencies">
-        <description>IGMP</description>
-        <RTE_Components_h>
-          #define RTE_CYCLONE_TCP_AUTO_IGMP
-        </RTE_Components_h>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/ipv4/igmp.h"/>
-          <file category="source" name="cyclone_tcp/ipv4/igmp.c"/>
-        </files>
-      </component>
-      
       <component Cgroup="IPv4" Csub="Auto-IP" condition="CycloneTCP Auto-IP Dependencies">
         <description>Auto-IP</description>
         <RTE_Components_h>
@@ -1836,8 +1849,66 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_tcp/"/>
+          
           <file category="header" name="cyclone_tcp/ipv4/auto_ip.h"/>
+          <file category="header" name="cyclone_tcp/ipv4/auto_ip_misc.h"/>
+          
           <file category="source" name="cyclone_tcp/ipv4/auto_ip.c"/>
+          <file category="source" name="cyclone_tcp/ipv4/auto_ip_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="IGMP" Csub="IGMP Host" condition="CycloneTCP IGMP Host Dependencies">
+        <description>IGMP Host</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_IGMP_HOST
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/igmp/igmp_host.h"/>
+          <file category="header" name="cyclone_tcp/igmp/igmp_host_misc.h"/>
+          <file category="header" name="cyclone_tcp/igmp/igmp_common.h"/>
+          
+          <file category="source" name="cyclone_tcp/igmp/igmp_host.c"/>
+          <file category="source" name="cyclone_tcp/igmp/igmp_host_misc.c"/>
+          <file category="source" name="cyclone_tcp/igmp/igmp_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="IGMP" Csub="IGMP Router" condition="CycloneTCP IGMP Router Dependencies">
+        <description>IGMP Router</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_IGMP_ROUTER
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/igmp/igmp_router.h"/>
+          <file category="header" name="cyclone_tcp/igmp/igmp_router_misc.h"/>
+          <file category="header" name="cyclone_tcp/igmp/igmp_common.h"/>
+          
+          <file category="source" name="cyclone_tcp/igmp/igmp_router.c"/>
+          <file category="source" name="cyclone_tcp/igmp/igmp_router_misc.c"/>
+          <file category="source" name="cyclone_tcp/igmp/igmp_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="IGMP" Csub="IGMP Snooping" condition="CycloneTCP IGMP Snooping Dependencies">
+        <description>IGMP Snooping Switch</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_IGMP_SNOOPING
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/igmp/igmp_snooping.h"/>
+          <file category="header" name="cyclone_tcp/igmp/igmp_snooping_misc.h"/>
+          <file category="header" name="cyclone_tcp/igmp/igmp_common.h"/>
+          
+          <file category="source" name="cyclone_tcp/igmp/igmp_snooping.c"/>
+          <file category="source" name="cyclone_tcp/igmp/igmp_snooping_misc.c"/>
+          <file category="source" name="cyclone_tcp/igmp/igmp_common.c"/>
         </files>
       </component>
       
@@ -1891,7 +1962,10 @@
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/ipv6/slaac.h"/>
+          <file category="header" name="cyclone_tcp/ipv6/slaac_misc.h"/>
+          
           <file category="source" name="cyclone_tcp/ipv6/slaac.c"/>
+          <file category="source" name="cyclone_tcp/ipv6/slaac_misc.c"/>
         </files>
       </component>
       
@@ -1902,8 +1976,12 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_tcp/"/>
+          
           <file category="header" name="cyclone_tcp/ipv6/ndp_router_adv.h"/>
+          <file category="header" name="cyclone_tcp/ipv6/ndp_router_adv_misc.h"/>
+          
           <file category="source" name="cyclone_tcp/ipv6/ndp_router_adv.c"/>
+          <file category="source" name="cyclone_tcp/ipv6/ndp_router_adv_misc.c"/>
         </files>
       </component>
       
@@ -1916,10 +1994,14 @@
           <file category="include" name="cyclone_tcp/"/>
           
           <file category="header" name="cyclone_tcp/dhcp/dhcp_client.h"/>
+          <file category="header" name="cyclone_tcp/dhcp/dhcp_client_fsm.h"/>
+          <file category="header" name="cyclone_tcp/dhcp/dhcp_client_misc.h"/>
           <file category="header" name="cyclone_tcp/dhcp/dhcp_common.h"/>
           <file category="header" name="cyclone_tcp/dhcp/dhcp_debug.h"/>
           
           <file category="source" name="cyclone_tcp/dhcp/dhcp_client.c"/>
+          <file category="source" name="cyclone_tcp/dhcp/dhcp_client_fsm.c"/>
+          <file category="source" name="cyclone_tcp/dhcp/dhcp_client_misc.c"/>
           <file category="source" name="cyclone_tcp/dhcp/dhcp_common.c"/>
           <file category="source" name="cyclone_tcp/dhcp/dhcp_debug.c"/>
         </files>
@@ -1934,10 +2016,12 @@
           <file category="include" name="cyclone_tcp/"/>
           
           <file category="header" name="cyclone_tcp/dhcp/dhcp_server.h"/>
+          <file category="header" name="cyclone_tcp/dhcp/dhcp_server_misc.h"/>
           <file category="header" name="cyclone_tcp/dhcp/dhcp_common.h"/>
           <file category="header" name="cyclone_tcp/dhcp/dhcp_debug.h"/>
           
           <file category="source" name="cyclone_tcp/dhcp/dhcp_server.c"/>
+          <file category="source" name="cyclone_tcp/dhcp/dhcp_server_misc.c"/>
           <file category="source" name="cyclone_tcp/dhcp/dhcp_common.c"/>
           <file category="source" name="cyclone_tcp/dhcp/dhcp_debug.c"/>
         </files>
@@ -1952,10 +2036,14 @@
           <file category="include" name="cyclone_tcp/"/>
           
           <file category="header" name="cyclone_tcp/dhcpv6/dhcpv6_client.h"/>
+          <file category="header" name="cyclone_tcp/dhcpv6/dhcpv6_client_fsm.h"/>
+          <file category="header" name="cyclone_tcp/dhcpv6/dhcpv6_client_misc.h"/>
           <file category="header" name="cyclone_tcp/dhcpv6/dhcpv6_common.h"/>
           <file category="header" name="cyclone_tcp/dhcpv6/dhcpv6_debug.h"/>
           
           <file category="source" name="cyclone_tcp/dhcpv6/dhcpv6_client.c"/>
+          <file category="source" name="cyclone_tcp/dhcpv6/dhcpv6_client_fsm.c"/>
+          <file category="source" name="cyclone_tcp/dhcpv6/dhcpv6_client_misc.c"/>
           <file category="source" name="cyclone_tcp/dhcpv6/dhcpv6_common.c"/>
           <file category="source" name="cyclone_tcp/dhcpv6/dhcpv6_debug.c"/>
         </files>
@@ -2558,8 +2646,16 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_tcp/"/>
+          
           <file category="header" name="cyclone_tcp/smtp/smtp_client.h"/>
+          <file category="header" name="cyclone_tcp/smtp/smtp_client_auth.h"/>
+          <file category="header" name="cyclone_tcp/smtp/smtp_client_transport.h"/>
+          <file category="header" name="cyclone_tcp/smtp/smtp_client_misc.h"/>
+          
           <file category="source" name="cyclone_tcp/smtp/smtp_client.c"/>
+          <file category="source" name="cyclone_tcp/smtp/smtp_client_auth.c"/>
+          <file category="source" name="cyclone_tcp/smtp/smtp_client_transport.c"/>
+          <file category="source" name="cyclone_tcp/smtp/smtp_client_misc.c"/>
         </files>
       </component>
       
@@ -3872,6 +3968,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="DP83826" condition="CycloneTCP Core Dependencies">
+        <description>TI DP83826 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/dp83826_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/dp83826_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (PHY)" Csub="DP83848" condition="CycloneTCP Core Dependencies">
         <description>TI DP83848 Ethernet PHY transceiver</description>
         <files>
@@ -4280,7 +4385,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.0.4">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.1.0">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -4308,10 +4413,10 @@
           <file category="header" name="cyclone_ssl/tls_record_decryption.h"/>
           <file category="header" name="cyclone_ssl/tls_misc.h"/>
           <file category="header" name="cyclone_ssl/tls13_common.h"/>
+          <file category="header" name="cyclone_ssl/tls13_signature.h"/>
           <file category="header" name="cyclone_ssl/tls13_key_material.h"/>
           <file category="header" name="cyclone_ssl/tls13_ticket.h"/>
           <file category="header" name="cyclone_ssl/tls13_misc.h"/>
-          <file category="header" name="cyclone_ssl/ssl_misc.h"/>
           
           <file category="source" name="cyclone_ssl/tls.c"/>
           <file category="source" name="cyclone_ssl/tls_cipher_suites.c"/>
@@ -4329,12 +4434,12 @@
           <file category="source" name="cyclone_ssl/tls_record_decryption.c"/>
           <file category="source" name="cyclone_ssl/tls_misc.c"/>
           <file category="source" name="cyclone_ssl/tls13_common.c"/>
+          <file category="source" name="cyclone_ssl/tls13_signature.c"/>
           <file category="source" name="cyclone_ssl/tls13_key_material.c"/>
           <file category="source" name="cyclone_ssl/tls13_ticket.c"/>
           <file category="source" name="cyclone_ssl/tls13_misc.c"/>
-          <file category="source" name="cyclone_ssl/ssl_misc.c"/>
           
-          <file category="header" name="config/tls_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/tls_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -4983,7 +5088,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.0.4">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.1.0">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -5035,7 +5140,7 @@
           <file category="source" name="cyclone_ssh/ssh/ssh_modp_groups.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_misc.c"/>
           
-          <file category="header" name="config/ssh_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/ssh_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -5288,7 +5393,7 @@
       </component>
       
       <component Cgroup="Cipher Mode" Csub="CBC" condition="CycloneSSH CBC Dependencies">
-        <description>CBC Cipher Mode (insecure)</description>
+        <description>CBC Cipher Mode (weak)</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSH_CBC
         </RTE_Components_h>
@@ -5470,7 +5575,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.0.4">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.1.0">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -5482,7 +5587,7 @@
         <files>
           <file category="include" name="cyclone_stp/"/>
           <file category="header" name="cyclone_stp/stp/stp_common.h"/>
-          <file category="header" name="config/stp_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/stp_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -5601,7 +5706,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.0.4">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.1.0">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -5612,7 +5717,7 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_acme/"/>
-          <file category="header" name="config/acme_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="config/acme_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -5683,7 +5788,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.0.4">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.1.0">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -5696,7 +5801,9 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/core/crypto.h"/>
           <file category="header" name="cyclone_crypto/core/crypto_legacy.h"/>
-          <file category="header" name="config/crypto_config.h" attr="config" version="2.0.0"/>
+          <file category="header" name="cyclone_crypto/hash/hash_algorithms.h"/>
+          <file category="header" name="cyclone_crypto/cipher/cipher_algorithms.h"/>
+          <file category="header" name="config/crypto_config.h" attr="config" version="2.1.0"/>
         </files>
       </component>
       
@@ -6934,6 +7041,295 @@
           <file category="source" name="cyclone_crypto/pkix/pkcs8_key_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <!-- Hardware Cryptographic Accelerators -->
+      <component Cgroup="Hardware" Csub="SAML11" condition="CycloneCRYPTO Core Dependencies">
+        <description>Atmel SAML11 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/saml11_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/saml11_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/saml11_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/saml11_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/saml11_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/saml11_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/saml11_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/saml11_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="SAMD51" condition="CycloneCRYPTO Core Dependencies">
+        <description>Atmel SAMD51 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/samd51_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/samd51_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/samd51_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/samd51_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/samd51_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/samd51_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="SAME54" condition="CycloneCRYPTO Core Dependencies">
+        <description>Atmel SAME54 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/same54_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/same54_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/same54_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/same54_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/same54_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/same54_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="SAME70" condition="CycloneCRYPTO Core Dependencies">
+        <description>Atmel SAME70 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/same70_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/same70_crypto_trng.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/same70_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/same70_crypto_trng.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="SAMV71" condition="CycloneCRYPTO Core Dependencies">
+        <description>Atmel SAMV71 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/samv71_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/samv71_crypto_trng.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/samv71_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/samv71_crypto_trng.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="K6x" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP Kinetis K6x cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mk6x_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mk6x_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mk6x_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mk6x_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mk6x_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mk6x_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mk6x_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mk6x_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="KV5x" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP Kinetis KV5x cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mkv5x_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mkv5x_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mkv5x_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mkv5x_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mkv5x_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mkv5x_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mkv5x_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mkv5x_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="LPC54xxx" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP LPC54xxx cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/lpc54xxx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc54xxx_crypto_trng.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/lpc54xxx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc54xxx_crypto_trng.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="i.MX RT1050" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP i.MX RT1050 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1050_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1050_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1050_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1050_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1050_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1050_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1050_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1050_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="i.MX RT1060" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP i.MX RT1060 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1060_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1060_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1060_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1060_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1060_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1060_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1060_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1060_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="RA6" condition="CycloneCRYPTO Core Dependencies">
+        <description>Renesas RA6 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/ra6_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/ra6_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/ra6_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/ra6_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/ra6_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/ra6_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/ra6_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/ra6_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="EFM32GG11" condition="CycloneCRYPTO Core Dependencies">
+        <description>Silicon Labs EFM32 Giant Gecko 11 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/efm32gg11_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/efm32gg11_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/efm32gg11_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/efm32gg11_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/efm32gg11_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/efm32gg11_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/efm32gg11_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/efm32gg11_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/efm32gg11_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/efm32gg11_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32F2xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32F2 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32f2xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f2xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f2xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f2xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32f2xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f2xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f2xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f2xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32F4xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32F4 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32f4xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f4xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f4xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f4xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32f4xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f4xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f4xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f4xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32F7xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32F7 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32f7xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f7xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f7xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32f7xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32f7xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f7xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f7xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32f7xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32H7xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32H7 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32h7xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32h7xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32h7xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32h7xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32h7xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32h7xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32h7xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32h7xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32L4xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32L4 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32l4xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32l4xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32l4xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32l4xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32l4xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32l4xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32l4xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32l4xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32MP1xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32MP1 cryptographic accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32mp1xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32mp1xx_crypto_trng.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32mp1xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32mp1xx_crypto_trng.c"/>
         </files>
       </component>
     </bundle>
