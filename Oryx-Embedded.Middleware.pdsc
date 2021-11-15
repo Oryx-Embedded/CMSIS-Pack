@@ -1588,7 +1588,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.1.0">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.1.2">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1767,7 +1767,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.1.0">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.1.2">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -4446,7 +4446,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.1.0">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.1.2">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -5149,7 +5149,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.1.0">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.1.2">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -5654,7 +5654,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.1.0">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.1.2">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -5785,7 +5785,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.1.0">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.1.2">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -5867,7 +5867,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.1.0">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.1.2">
       <description>Cryptographic Library</description>
       <doc></doc>
       
