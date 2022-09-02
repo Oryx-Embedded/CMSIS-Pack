@@ -10,6 +10,25 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.1.8" date="2022-09-02">
+      - Added Echo server implementation (RFC 826)
+      - Migrated SAME53, SAME54, SAME70 and SAMV71 Ethernet MAC drivers to latest DFP pack (new register definitions)
+      - Added Ethernet MAC driver for TI Hercules RM57 (10/100 Ethernet MAC)
+      - Added driver for Microchip LAN9250 (Ethernet 10/100 controller with SPI interface)
+      - Added driver for WIZnet W5100S, W5200, W5500 and W6100 (Ethernet 10/100 controllers with SPI interface)
+      - Added driver for ADIN1110 (10Base-T1L MAC+PHY controller with SPI interface)
+      - Added driver for ADIN2111 (2-port 10Base-T1L switch with SPI interface)
+      - Added driver for DP83TD510E (10Base-T1L PHY)
+      - Support for new Analog Devices PHYs: ADIN1100 (10Base-T1L), ADIN1200 (100Base-TX) and ADIN1300 (1000Base-T)
+      - Added CAST-128, CAST-256, Twofish and Serpent block cipher algorithms
+      - Added support for Microchip PIC32CX-BZ2 hardware cryptographic accelerator (TRNG, ICM, AES and PUKCC peripherals)
+      - Added support for Microchip SAM4C hardware cryptographic accelerator (TRNG, ICM and AES peripherals)
+      - Added support for Microchip SAM4L hardware cryptographic accelerator (TRNG and AES peripherals)
+      - Added support for Microchip SAME51 hardware cryptographic accelerator (TRNG, ICM, AES and PUKCC peripherals)
+      - Added support for NXP LPC55S69 hardware cryptographic accelerator (RNG, HASHCRYPT and CASPER peripherals)
+      - Added support for NXP S32K1 hardware cryptographic accelerator (CSEq peripheral)
+      - Fixed PEM file encoding process to limit the length of the lines to 64 characters
+    </release>
     <release version="2.1.6" date="2022-05-31">
       - Reworked LLMNR and mDNS responders to support multiple IPv4 addresses per interface
       - Added dhcpClientRelease() API to the DHCP client
@@ -17,7 +36,7 @@
       - Fixed silicon errata ETH#2 in Tiva TM4C129 Ethernet driver
       - Added parsing routines for OpenSSH private keys (CycloneSSH)
       - Support for certificate-based authentication using OpenSSH certificate format (CycloneSSH)
-      - Added support for AEAD_AES_128_GCM and AEAD_AES_128_GCM encryption algorithms as per RFC 5647 (CycloneSSH)
+      - Added support for AEAD_AES_128_GCM and AEAD_AES_256_GCM encryption algorithms as per RFC 5647 (CycloneSSH)
       - Added support for SSH extension negotiation mechanism (RFC 8308)
       - Added support for Commercial National Security Algorithm (CNSA) suite cryptography (CycloneSSH)
       - Added support for i.MX RT1170 hardware cryptographic accelerator (CAAM peripheral)
@@ -66,7 +85,7 @@
       - Support for NXP K60, K64, K65, K66 and KV5x hardware cryptographic accelerator (TRNG and MMCAU peripherals)
       - Support for NXP i.MX RT1050 and i.MX RT1060 hardware cryptographic accelerator (TRNG and DCP peripherals)
       - Support for Renesas RA6M2 and RA6M3 hardware cryptographic accelerator (SCE7 peripheral)
-      - Support for Microchip/Atmel SAM L11 hardware cryptographic accelerator (TRNG and CRYA peripherals)
+      - Support for Microchip SAM L11 hardware cryptographic accelerator (TRNG and CRYA peripherals)
       - Support for STM32F2/F4/F7/H7 hardware cryptographic accelerator (TRNG, HASH and CRYP peripherals)
       - Support for STM32L4 hardware cryptographic accelerator (TRNG, HASH and AES peripherals)
     </release>
@@ -616,6 +635,11 @@
       <description>CycloneTCP LLMNR Responder Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
+    </condition>
+    <condition id="CycloneTCP Echo Server Dependencies">
+      <description>CycloneTCP Echo Server Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="TCP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
     </condition>
     <condition id="CycloneTCP CoAP Client Dependencies">
       <description>CycloneTCP CoAP Client Dependencies</description>
@@ -1291,6 +1315,11 @@
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="RC4"/>
       <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
     </condition>
+    <condition id="CycloneSSH CAST-128 Dependencies">
+      <description>CycloneSSH CAST-128 Dependencies</description>
+      <require Cclass="CycloneSSH" Cgroup="Core"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="CAST-128"/>
+    </condition>
     <condition id="CycloneSSH IDEA Dependencies">
       <description>CycloneSSH IDEA Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="Core"/>
@@ -1310,6 +1339,16 @@
       <description>CycloneSSH AES Dependencies</description>
       <require Cclass="CycloneSSH" Cgroup="Core"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="AES"/>
+    </condition>
+    <condition id="CycloneSSH Twofish Dependencies">
+      <description>CycloneSSH Twofish Dependencies</description>
+      <require Cclass="CycloneSSH" Cgroup="Core"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="Twofish"/>
+    </condition>
+    <condition id="CycloneSSH Serpent Dependencies">
+      <description>CycloneSSH Serpent Dependencies</description>
+      <require Cclass="CycloneSSH" Cgroup="Core"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="Serpent"/>
     </condition>
     <condition id="CycloneSSH Camellia Dependencies">
       <description>CycloneSSH Camellia Dependencies</description>
@@ -1557,6 +1596,7 @@
     <description Cclass="CycloneTCP" Cgroup="DNS-SD">DNS-SD Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="NetBIOS">NetBIOS Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="LLMNR">LLMNR Protocol</description>
+    <description Cclass="CycloneTCP" Cgroup="Echo">Echo Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="CoAP">CoAP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="FTP">FTP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="MQTT">MQTT Protocol</description>
@@ -1628,7 +1668,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.1.6">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.1.8">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1807,7 +1847,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.1.6">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.1.8">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -2349,6 +2389,22 @@
           
           <file category="source" name="cyclone_tcp/llmnr/llmnr_responder.c"/>
           <file category="source" name="cyclone_tcp/llmnr/llmnr_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Echo" Csub="Echo Server" condition="CycloneTCP Echo Server Dependencies">
+        <description>Echo Server</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_ECHO_SERVER
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/echo/echo_server.h"/>
+          <file category="header" name="cyclone_tcp/echo/echo_server_misc.h"/>
+          
+          <file category="source" name="cyclone_tcp/echo/echo_server.c"/>
+          <file category="source" name="cyclone_tcp/echo/echo_server_misc.c"/>
         </files>
       </component>
       
@@ -3341,8 +3397,17 @@
       </component>
       
       <!-- MAC Drivers -->
+      <component Cgroup="Drivers (MAC)" Csub="PIC32CX" condition="CycloneTCP Core Dependencies">
+        <description>Microchip PIC32CX Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/pic32cx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/pic32cx_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="SAM3X" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAM3X Ethernet MAC controller</description>
+        <description>Microchip SAM3X Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/sam3x_eth_driver.h"/>
@@ -3351,7 +3416,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAM4E" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAM4E Ethernet MAC controller</description>
+        <description>Microchip SAM4E Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/sam4e_eth_driver.h"/>
@@ -3360,7 +3425,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAM7X" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAM7X Ethernet MAC controller</description>
+        <description>Microchip SAM7X Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/sam7x_eth_driver.h"/>
@@ -3369,7 +3434,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAM9263" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAM9263 Ethernet MAC controller</description>
+        <description>Microchip SAM9263 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/sam9263_eth_driver.h"/>
@@ -3378,7 +3443,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAM9X60" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAM9X60 Ethernet MAC controller</description>
+        <description>Microchip SAM9X60 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           
@@ -3391,7 +3456,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAMA5D2" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAMA5D2 Ethernet MAC controller</description>
+        <description>Microchip SAMA5D2 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/sama5d2_eth_driver.h"/>
@@ -3400,7 +3465,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAMA5D3" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAMA5D3 Ethernet MAC controller</description>
+        <description>Microchip SAMA5D3 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           
@@ -3413,7 +3478,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAME53" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAME53 Ethernet MAC controller</description>
+        <description>Microchip SAME53 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/same53_eth_driver.h"/>
@@ -3422,7 +3487,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAME54" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAME54 Ethernet MAC controller</description>
+        <description>Microchip SAME54 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/same54_eth_driver.h"/>
@@ -3431,7 +3496,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAME70" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAME70 Ethernet MAC controller</description>
+        <description>Microchip SAME70 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/same70_eth_driver.h"/>
@@ -3440,7 +3505,7 @@
       </component>
       
       <component Cgroup="Drivers (MAC)" Csub="SAMV71" condition="CycloneTCP Core Dependencies">
-        <description>Atmel SAMV71 Ethernet MAC controller</description>
+        <description>Microchip SAMV71 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/samv71_eth_driver.h"/>
@@ -3612,7 +3677,16 @@
           <file category="header" name="cyclone_tcp/drivers/mac/lpc54xxx_eth_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/mac/lpc54xxx_eth_driver.c"/>
         </files>
-      </component>      
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="S32K1" condition="CycloneTCP Core Dependencies">
+        <description>NXP S32K1 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/s32k1_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/s32k1_eth_driver.c"/>
+        </files>
+      </component>
       
       <component Cgroup="Drivers (MAC)" Csub="K6x" condition="CycloneTCP Core Dependencies">
         <description>NXP Kinetis K6x Ethernet MAC controller</description>
@@ -3698,15 +3772,6 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="S32K148" condition="CycloneTCP Core Dependencies">
-        <description>NXP S32K148 Ethernet MAC controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/mac/s32k148_eth_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/mac/s32k148_eth_driver.c"/>
-        </files>
-      </component>
-      
       <component Cgroup="Drivers (MAC)" Csub="i.MX6UL" condition="CycloneTCP Core Dependencies">
         <description>NXP i.MX6UL Ethernet MAC controller</description>
         <files>
@@ -3742,7 +3807,7 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="RA6M3" condition="CycloneTCP Core Dependencies">
+      <component Cgroup="Drivers (MAC)" Csub="RA6" condition="CycloneTCP Core Dependencies">
         <description>Renesas RA6 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
@@ -3877,6 +3942,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="RM57" condition="CycloneTCP Core Dependencies">
+        <description>TI RM57 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/rm57_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/rm57_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="TMS570" condition="CycloneTCP Core Dependencies">
         <description>TI TMS570 Ethernet MAC controller</description>
         <files>
@@ -3896,6 +3970,33 @@
       </component>
       
       <!-- PHY Drivers -->
+      <component Cgroup="Drivers (PHY)" Csub="ADIN1100" condition="CycloneTCP Core Dependencies">
+        <description>Analog Devices ADIN1100 10Base-T1L PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/adin1100_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/adin1100_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="ADIN1200" condition="CycloneTCP Core Dependencies">
+        <description>Analog Devices ADIN1200 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/adin1200_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/adin1200_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="ADIN1300" condition="CycloneTCP Core Dependencies">
+        <description>Analog Devices ADIN1300 Gigabit Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/adin1300_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/adin1300_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (PHY)" Csub="AR8031" condition="CycloneTCP Core Dependencies">
         <description>Atheros AR8031 Gigabit Ethernet PHY transceiver</description>
         <files>
@@ -4028,6 +4129,33 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/ksz9131_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/phy/ksz9131_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8670" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8670 10Base-T1S PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8670_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8670_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8671" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8671 10Base-T1S PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8671_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8671_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="LAN8672" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8672 10Base-T1S PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8672_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8672_driver.c"/>
         </files>
       </component>
       
@@ -4229,6 +4357,24 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="DP83TD510" condition="CycloneTCP Core Dependencies">
+        <description>TI DP83TD510 10Base-T1L PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/dp83td510_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/dp83td510_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="ADIN2111" condition="CycloneTCP Core Dependencies">
+        <description>Analog Devices ADIN2111 10Base-T1L switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/adin2111_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/adin2111_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Switch)" Csub="MV88E6060" condition="CycloneTCP Core Dependencies">
         <description>Marvell 88E6060 Ethernet switch</description>
         <files>
@@ -4427,6 +4573,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Ethernet)" Csub="ADIN1110" condition="CycloneTCP Core Dependencies">
+        <description>Analog Devices ADIN1110 10Base-T1L controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/adin1110_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/adin1110_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Ethernet)" Csub="ENC28J60" condition="CycloneTCP Core Dependencies">
         <description>Microchip ENC28J60 Ethernet controller</description>
         <files>
@@ -4454,8 +4609,44 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Ethernet)" Csub="LAN9250" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN9250 Ethernet controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/lan9250_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/lan9250_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Ethernet)" Csub="W5100S" condition="CycloneTCP Core Dependencies">
+        <description>WIZnet W5100S Ethernet controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/w5100s_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/w5100s_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Ethernet)" Csub="W5500" condition="CycloneTCP Core Dependencies">
+        <description>WIZnet W5500 Ethernet controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/w5500_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/w5500_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Ethernet)" Csub="W6100" condition="CycloneTCP Core Dependencies">
+        <description>WIZnet W6100 Ethernet controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/w6100_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/w6100_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Wi-Fi)" Csub="WILC1000" condition="CycloneTCP Core Dependencies">
-        <description>Atmel WILC1000 Wi-Fi controller</description>
+        <description>Microchip WILC1000 Wi-Fi controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/wifi/wilc1000_driver.h"/>
@@ -4537,7 +4728,7 @@
       </component>
       
       <component Cgroup="Drivers (Wi-Fi)" Csub="WINC1500" condition="CycloneTCP Core Dependencies">
-        <description>Atmel WINC1500 Wi-Fi controller</description>
+        <description>Microchip WINC1500 Wi-Fi controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/wifi/winc1500_driver.h"/>
@@ -4646,7 +4837,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.1.6">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.1.8">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -5201,7 +5392,7 @@
         <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
         <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
         </files>
-      </component> 
+      </component>
       
       <component Cgroup="Groups" Csub="secp160k1" condition="CycloneSSL secp160k1 Dependencies">
         <description>secp160k1 Elliptic Curve</description>
@@ -5349,7 +5540,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.1.6">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.1.8">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -5714,6 +5905,15 @@
         </files>
       </component>
       
+      <component Cgroup="Cipher" Csub="CAST-128" condition="CycloneSSH CAST-128 Dependencies">
+        <description>CAST-128 Block Cipher (insecure)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSH_CAST128
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
       <component Cgroup="Cipher" Csub="IDEA" condition="CycloneSSH IDEA Dependencies">
         <description>IDEA Block Cipher (insecure)</description>
         <RTE_Components_h>
@@ -5745,6 +5945,24 @@
         <description>AES Block Cipher</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSH_AES
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="Twofish" condition="CycloneSSH Twofish Dependencies">
+        <description>Twofish Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSH_TWOFISH
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="Serpent" condition="CycloneSSH Serpent Dependencies">
+        <description>Serpent Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SSH_SERPENT
         </RTE_Components_h>
         <files>
         </files>
@@ -5869,7 +6087,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.1.6">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.1.8">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -6000,7 +6218,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.1.6">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.1.8">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -6082,7 +6300,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.1.6">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.1.8">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -6596,6 +6814,30 @@
         </files>
       </component>
       
+      <component Cgroup="Cipher" Csub="CAST-128" condition="CycloneCRYPTO Core Dependencies">
+        <description>CAST-128 Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_CAST128
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/cipher/cast128.h"/>
+          <file category="source" name="cyclone_crypto/cipher/cast128.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="CAST-256" condition="CycloneCRYPTO Core Dependencies">
+        <description>CAST-256 Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_CAST256
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/cipher/cast256.h"/>
+          <file category="source" name="cyclone_crypto/cipher/cast256.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Cipher" Csub="IDEA" condition="CycloneCRYPTO Core Dependencies">
         <description>IDEA Block Cipher</description>
         <RTE_Components_h>
@@ -6653,6 +6895,30 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/cipher/blowfish.h"/>
           <file category="source" name="cyclone_crypto/cipher/blowfish.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="Twofish" condition="CycloneCRYPTO Core Dependencies">
+        <description>Twofish Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_TWOFISH
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/cipher/twofish.h"/>
+          <file category="source" name="cyclone_crypto/cipher/twofish.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="Serpent" condition="CycloneCRYPTO Core Dependencies">
+        <description>Serpent Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_SERPENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/cipher/serpent.h"/>
+          <file category="source" name="cyclone_crypto/cipher/serpent.c"/>
         </files>
       </component>
       
@@ -7352,8 +7618,77 @@
       </component>
       
       <!-- Hardware Cryptographic Accelerators -->
+      <component Cgroup="Hardware" Csub="PIC32CM" condition="CycloneCRYPTO Core Dependencies">
+        <description>Microchip PIC32CM Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32cm/pic32cm_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <!-- Hardware Cryptographic Accelerators -->
+      <component Cgroup="Hardware" Csub="PIC32CX" condition="CycloneCRYPTO Core Dependencies">
+        <description>Microchip PIC32CX Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32cx/pic32cx_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="SAM4L" condition="CycloneCRYPTO Core Dependencies">
+        <description>Microchip SAM4L Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/sam4l/sam4l_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sam4l/sam4l_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sam4l/sam4l_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/sam4l/sam4l_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sam4l/sam4l_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sam4l/sam4l_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="SAM4C" condition="CycloneCRYPTO Core Dependencies">
+        <description>Microchip SAM4C Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/sam4c/sam4c_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sam4c/sam4c_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sam4c/sam4c_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sam4c/sam4c_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/sam4c/sam4c_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sam4c/sam4c_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sam4c/sam4c_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sam4c/sam4c_crypto_cipher.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Hardware" Csub="SAM4E" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAM4E Cryptographic Accelerator</description>
+        <description>Microchip SAM4E Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7366,7 +7701,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAML11" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAML11 Cryptographic Accelerator</description>
+        <description>Microchip SAML11 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7383,7 +7718,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAMD51" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAMD51 Cryptographic Accelerator</description>
+        <description>Microchip SAMD51 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7401,8 +7736,27 @@
         </files>
       </component>
       
+      <component Cgroup="Hardware" Csub="SAME51" condition="CycloneCRYPTO Core Dependencies">
+        <description>Microchip SAME51 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/same51/same51_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/same51/same51_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/same51/same51_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/same51/same51_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/same51/same51_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/same51/same51_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/same51/same51_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/same51/same51_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/same51/same51_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/same51/same51_crypto_pkc.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Hardware" Csub="SAME53" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAME53 Cryptographic Accelerator</description>
+        <description>Microchip SAME53 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7421,7 +7775,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAME54" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAME54 Cryptographic Accelerator</description>
+        <description>Microchip SAME54 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7440,7 +7794,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAME70" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAME70 Cryptographic Accelerator</description>
+        <description>Microchip SAME70 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7457,7 +7811,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAMV71" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAMV71 Cryptographic Accelerator</description>
+        <description>Microchip SAMV71 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7474,7 +7828,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAMA5D2" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAMA5D2 Cryptographic Accelerator</description>
+        <description>Microchip SAMA5D2 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7491,7 +7845,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAMA5D3" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAMA5D3 Cryptographic Accelerator</description>
+        <description>Microchip SAMA5D3 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7508,7 +7862,7 @@
       </component>
       
       <component Cgroup="Hardware" Csub="SAM9X60" condition="CycloneCRYPTO Core Dependencies">
-        <description>Atmel SAM9X60 Cryptographic Accelerator</description>
+        <description>Microchip SAM9X60 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
@@ -7521,6 +7875,21 @@
           <file category="source" name="cyclone_crypto/hardware/sam9x60/sam9x60_crypto_trng.c"/>
           <file category="source" name="cyclone_crypto/hardware/sam9x60/sam9x60_crypto_hash.c"/>
           <file category="source" name="cyclone_crypto/hardware/sam9x60/sam9x60_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="S32K1" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP S32K1 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/s32k1/s32k1_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/s32k1/s32k1_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/s32k1/s32k1_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/s32k1/s32k1_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/s32k1/s32k1_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/s32k1/s32k1_crypto_cipher.c"/>
         </files>
       </component>
       
@@ -7570,6 +7939,25 @@
           <file category="source" name="cyclone_crypto/hardware/lpc54xxx/lpc54xxx_crypto.c"/>
           <file category="source" name="cyclone_crypto/hardware/lpc54xxx/lpc54xxx_crypto_trng.c"/>
           <file category="source" name="cyclone_crypto/hardware/lpc54xxx/lpc54xxx_crypto_hash.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="LPC55xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP LPC55xx Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_pkc.c"/>
         </files>
       </component>
       
@@ -7993,7 +8381,7 @@
     <!-- HTTP Server Demo (SAME70-Xplained) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/same70_xplained/http_server_demo">
       <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
-      <board name="SAME70-XPLD" vendor="Atmel"/>
+      <board name="SAME70-XPLD" vendor="Microchip"/>
       <project>
         <environment name="uv" load="http_server_demo.uvprojx"/>
       </project>
@@ -8012,7 +8400,7 @@
     <!-- HTTP Server Demo (SAMV71-Xplained-Ultra) -->
     <example name="CycloneTCP HTTP Server Demo" doc="abstract.txt" folder="demo/samv71_xplained_ultra/http_server_demo">
       <description>HTTP server demo (CycloneTCP and CMSIS-RTOS)</description>
-      <board name="SAMV71-XULTRA" vendor="Atmel"/>
+      <board name="SAMV71-XULTRA" vendor="Microchip"/>
       <project>
         <environment name="uv" load="http_server_demo.uvprojx"/>
       </project>
