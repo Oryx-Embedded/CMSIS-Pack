@@ -10,6 +10,13 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.2.2" date="2023-01-10">
+      - Added support for recvmsg function in the BSD socket API layer
+      - Added support for certificate_authorities extension (CycloneSSL)
+      - Decryption of encrypted PEM private keys (PKCS #8 or legacy PKCS #1 format)
+      - Added support for encrypted OpenSSH private keys (CycloneSSH)
+      - Migrated Renesas RA2, RA4 and RA6 hardware crypto drivers to FSP 4.2.0
+    </release>
     <release version="2.2.0" date="2022-11-28">
       - Added driver for GigaDevice GD32F470 Ethernet MAC
       - Fixed TLV formatting routine in LLDP module to accept information string larger than 127 bytes
@@ -608,12 +615,10 @@
     <condition id="CycloneTCP DNS Client Dependencies">
       <description>CycloneTCP DNS Client Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
-      <require Cclass="CycloneTCP" Cgroup="DNS" Csub="DNS Cache"/>
     </condition>
     <condition id="CycloneTCP mDNS Client Dependencies">
       <description>CycloneTCP mDNS Client Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
-      <require Cclass="CycloneTCP" Cgroup="DNS" Csub="DNS Cache"/>
     </condition>
     <condition id="CycloneTCP mDNS Responder Dependencies">
       <description>CycloneTCP mDNS Responder Dependencies</description>
@@ -627,7 +632,6 @@
       <description>CycloneTCP NBNS Client Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
-      <require Cclass="CycloneTCP" Cgroup="DNS" Csub="DNS Cache"/>
     </condition>
     <condition id="CycloneTCP NBNS Responder Dependencies">
       <description>CycloneTCP NBNS Responder Dependencies</description>
@@ -638,7 +642,6 @@
       <description>CycloneTCP LLMNR Client Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
-      <require Cclass="CycloneTCP" Cgroup="DNS" Csub="DNS Cache"/>
     </condition>
     <condition id="CycloneTCP LLMNR Responder Dependencies">
       <description>CycloneTCP LLMNR Responder Dependencies</description>
@@ -1677,7 +1680,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.2.0">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.2.2">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1856,7 +1859,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.2.0">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.2.2">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -2264,23 +2267,13 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/dns/dns_client.h"/>
-          <file category="source" name="cyclone_tcp/dns/dns_client.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="DNS" Csub="DNS Cache" condition="CycloneTCP Core Dependencies">
-        <description>DNS Cache</description>
-        <RTE_Components_h>
-          #define RTE_CYCLONE_TCP_DNS_CACHE
-        </RTE_Components_h>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
           
+          <file category="header" name="cyclone_tcp/dns/dns_client.h"/>
           <file category="header" name="cyclone_tcp/dns/dns_cache.h"/>
           <file category="header" name="cyclone_tcp/dns/dns_common.h"/>
           <file category="header" name="cyclone_tcp/dns/dns_debug.h"/>
           
+          <file category="source" name="cyclone_tcp/dns/dns_client.c"/>
           <file category="source" name="cyclone_tcp/dns/dns_cache.c"/>
           <file category="source" name="cyclone_tcp/dns/dns_common.c"/>
           <file category="source" name="cyclone_tcp/dns/dns_debug.c"/>
@@ -2297,9 +2290,15 @@
           
           <file category="header" name="cyclone_tcp/mdns/mdns_client.h"/>
           <file category="header" name="cyclone_tcp/mdns/mdns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_cache.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_debug.h"/>
           
           <file category="source" name="cyclone_tcp/mdns/mdns_client.c"/>
           <file category="source" name="cyclone_tcp/mdns/mdns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_cache.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_debug.c"/>
         </files>
       </component>
       
@@ -2314,10 +2313,14 @@
           <file category="header" name="cyclone_tcp/mdns/mdns_responder.h"/>
           <file category="header" name="cyclone_tcp/mdns/mdns_responder_misc.h"/>
           <file category="header" name="cyclone_tcp/mdns/mdns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_debug.h"/>
           
           <file category="source" name="cyclone_tcp/mdns/mdns_responder.c"/>
           <file category="source" name="cyclone_tcp/mdns/mdns_responder_misc.c"/>
           <file category="source" name="cyclone_tcp/mdns/mdns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_debug.c"/>
         </files>
       </component>
       
@@ -2347,9 +2350,15 @@
           
           <file category="header" name="cyclone_tcp/netbios/nbns_client.h"/>
           <file category="header" name="cyclone_tcp/netbios/nbns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_cache.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_debug.h"/>
           
           <file category="source" name="cyclone_tcp/netbios/nbns_client.c"/>
           <file category="source" name="cyclone_tcp/netbios/nbns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_cache.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_debug.c"/>
         </files>
       </component>
       
@@ -2363,9 +2372,13 @@
           
           <file category="header" name="cyclone_tcp/netbios/nbns_responder.h"/>
           <file category="header" name="cyclone_tcp/netbios/nbns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_debug.h"/>
           
           <file category="source" name="cyclone_tcp/netbios/nbns_responder.c"/>
           <file category="source" name="cyclone_tcp/netbios/nbns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_debug.c"/>
         </files>
       </component>
       
@@ -2379,9 +2392,15 @@
           
           <file category="header" name="cyclone_tcp/llmnr/llmnr_client.h"/>
           <file category="header" name="cyclone_tcp/llmnr/llmnr_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_cache.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_debug.h"/>
           
           <file category="source" name="cyclone_tcp/llmnr/llmnr_client.c"/>
           <file category="source" name="cyclone_tcp/llmnr/llmnr_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_cache.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_debug.c"/>
         </files>
       </component>
       
@@ -2395,9 +2414,13 @@
           
           <file category="header" name="cyclone_tcp/llmnr/llmnr_responder.h"/>
           <file category="header" name="cyclone_tcp/llmnr/llmnr_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_common.h"/>
+          <file category="header" name="cyclone_tcp/dns/dns_debug.h"/>
           
           <file category="source" name="cyclone_tcp/llmnr/llmnr_responder.c"/>
           <file category="source" name="cyclone_tcp/llmnr/llmnr_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_common.c"/>
+          <file category="source" name="cyclone_tcp/dns/dns_debug.c"/>
         </files>
       </component>
       
@@ -4855,7 +4878,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.2.0">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.2.2">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -5558,7 +5581,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.2.0">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.2.2">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -5594,6 +5617,7 @@
           <file category="header" name="cyclone_ssh/ssh/ssh_key_export.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_key_parse.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_key_format.h"/>
+          <file category="header" name="cyclone_ssh/ssh/ssh_key_decrypt.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_key_verify.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_cert_import.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_cert_export.h"/>
@@ -5623,6 +5647,7 @@
           <file category="source" name="cyclone_ssh/ssh/ssh_key_export.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_key_parse.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_key_format.c"/>
+          <file category="source" name="cyclone_ssh/ssh/ssh_key_decrypt.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_key_verify.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_cert_import.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_cert_export.c"/>
@@ -6128,7 +6153,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.2.0">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.2.2">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -6259,7 +6284,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.2.0">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.2.2">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -6341,7 +6366,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.2.0">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.2.2">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -7639,11 +7664,19 @@
           <file category="include" name="cyclone_crypto/"/>
           
           <file category="header" name="cyclone_crypto/pkix/pem_import.h"/>
+          <file category="header" name="cyclone_crypto/pkix/pem_decrypt.h"/>
+          <file category="header" name="cyclone_crypto/pkix/pem_common.h"/>
+          <file category="header" name="cyclone_crypto/pkix/pkcs5_decrypt.h"/>
+          <file category="header" name="cyclone_crypto/pkix/pkcs5_common.h"/>
           <file category="header" name="cyclone_crypto/pkix/pkcs8_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
           <file category="source" name="cyclone_crypto/pkix/pem_import.c"/>
+          <file category="source" name="cyclone_crypto/pkix/pem_decrypt.c"/>
+          <file category="source" name="cyclone_crypto/pkix/pem_common.c"/>
+          <file category="source" name="cyclone_crypto/pkix/pkcs5_decrypt.c"/>
+          <file category="source" name="cyclone_crypto/pkix/pkcs5_common.c"/>
           <file category="source" name="cyclone_crypto/pkix/pkcs8_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
