@@ -3,13 +3,34 @@
 <package schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="PACK.xsd">
   <vendor>Oryx-Embedded</vendor>
   <name>Middleware</name>
-  <description>Middleware Package (CycloneTCP, CycloneSSL, CycloneSSH, CycloneSTP, CycloneACME and CycloneCRYPTO)</description>
+  <description>Middleware Package (CycloneTCP, CycloneSSL, CycloneSSH, CycloneIPSEC, CycloneSTP, CycloneACME and CycloneCRYPTO)</description>
   <url>https://www.oryx-embedded.com/download/pack/</url>
   <supportContact>support@oryx-embedded.com</supportContact>
   <license>doc/license.txt</license>
   
   <!-- Releases section -->
   <releases>
+    <release version="2.3.0" date="2023-06-12">
+      - New IPsec/IKEv2 library (CycloneIPSEC)
+      - Added Syslog client implementation (as per RFC 3164)
+      - Added new APIs to set default TTL value for IPv4 (ipv4SetDefaultTtl) and default Hop Limit value for IPv6 (ipv6SetDefaultHopLimit)
+      - Added new API to configure TCP MSS value (socketSetMaxSegmentSize)
+      - Added new API to allow/disallow reception of broadcast datagrams on a socket (socketEnableBroadcast)
+      - Added new APIs to join/leave multicast groups per socket (socketJoinMulticastGroup and socketLeaveMulticastGroup)
+      - New BSD socket options supported (IP level): IP_ADD_MEMBERSHIP and IP_DROP_MEMBERSHIP, IP_RECVTTL, IP_RECVTOS
+      - New BSD socket options supported (IPv6 level): IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_V6ONLY, IPV6_PKTINFO, IPV6_HOPLIMIT, IPV6_RECVHOPLIMIT, IPV6_TCLASS and IPV6_RECVTCLASS
+      - New BSD socket options supported (TCP level): TCP_NODELAY and TCP_MAXSEG
+      - Callback mechanism that allows parsing/formatting of custom DHCP options at server side
+      - Callback mechanism for adding custom options in RA messages transmitted by the IPv6 Router
+      - Fixed incorrect timeout calculation in LLDP implementation in TX/RX mode that results in a tick period larger than nominal 1s value
+      - Added drivers for Microchip LAN8560 and LAN8561 (10Base-T1S MAC+PHY controllers with SPI interface)
+      - Added support for post-quantum hybrid SSH key exchange (Kyber-512/768/1024 and Streamlined NTRU Prime 761 KEMs are supported)
+      - Added OCSP client implementation (as per RFC 6960)
+      - Concat KDF key derivation function
+      - Added support for "Domain Components" RDNs when parsing X.509 certificates
+      - Parsing of "Authority Information Access" and "Access Description" X.509 extensions
+      - Added support for GigaDevice GD32W515 hardware cryptographic accelerator (TRNG, HAU, CAU and PKCAU peripherals)
+    </release>
     <release version="2.2.4" date="2023-03-09">
       - Added Ethernet MAC driver for STMicroelectronics STM32H5
       - Added Ethernet MAC driver for Microchip PIC32CX SG40/SG41/SG61
@@ -913,6 +934,11 @@
       <require Cclass="CycloneTCP" Cgroup="Socket"/>
       <require Cclass="CycloneSSL" Cgroup="TLS Server"/>
     </condition>
+    <condition id="CycloneTCP Syslog Client Dependencies">
+      <description>CycloneTCP Syslog Client Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="UDP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+    </condition>
     <condition id="CycloneTCP WebSocket Dependencies">
       <description>CycloneTCP WebSocket Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="TCP"/>
@@ -1439,6 +1465,181 @@
       <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
     </condition>
     
+    <!-- CycloneIPSEC Dependencies -->
+    <condition id="CycloneIPSEC IPsec Dependencies">
+      <description>CycloneIPSEC IPsec Dependencies</description>
+      <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
+    </condition>
+    <condition id="CycloneIPSEC AH Dependencies">
+      <description>CycloneIPSEC AH Dependencies</description>
+      <require Cclass="CycloneIPSEC" Cgroup="IPsec"/>
+    </condition>
+    <condition id="CycloneIPSEC ESP Dependencies">
+      <description>CycloneIPSEC ESP Dependencies</description>
+      <require Cclass="CycloneIPSEC" Cgroup="IPsec"/>
+    </condition>
+    <condition id="CycloneIPSEC IKE Dependencies">
+      <description>CycloneIPSEC IKE Dependencies</description>
+      <require Cclass="CycloneIPSEC" Cgroup="IPsec"/>
+    </condition>
+    <condition id="CycloneIPSEC Certificate Dependencies">
+      <description>CycloneIPSEC Certificate Dependencies</description>
+      <require Cclass="CycloneIPSEC" Cgroup="IKE"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Key Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Creation"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Validation"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="PEM File Import"/>
+    </condition>
+    <condition id="CycloneIPSEC PSK Dependencies">
+      <description>CycloneIPSEC Diffie-Hellman Dependencies</description>
+      <require Cclass="CycloneIPSEC" Cgroup="IKE"/>
+    </condition>
+    <condition id="CycloneIPSEC Diffie-Hellman Dependencies">
+      <description>CycloneIPSEC Diffie-Hellman Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKC" Csub="DH"/>
+    </condition>
+    <condition id="CycloneIPSEC ECDH Dependencies">
+      <description>CycloneIPSEC ECDH Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="ECDH"/>
+    </condition>
+    <condition id="CycloneIPSEC Curve25519 Dependencies">
+      <description>CycloneIPSEC Curve25519 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="X25519"/>
+    </condition>
+    <condition id="CycloneIPSEC Curve448 Dependencies">
+      <description>CycloneIPSEC Curve448 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="X448"/>
+    </condition>
+    <condition id="CycloneIPSEC RSA Dependencies">
+      <description>CycloneIPSEC RSA Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKC" Csub="RSA"/>
+    </condition>
+    <condition id="CycloneIPSEC DSA Dependencies">
+      <description>CycloneIPSEC DSA Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKC" Csub="DSA"/>
+    </condition>
+    <condition id="CycloneIPSEC ECDSA Dependencies">
+      <description>CycloneIPSEC ECDSA Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="ECDSA"/>
+    </condition>
+    <condition id="CycloneIPSEC Ed25519 Dependencies">
+      <description>CycloneIPSEC Ed25519 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Ed25519"/>
+    </condition>
+    <condition id="CycloneIPSEC Ed448 Dependencies">
+      <description>CycloneIPSEC Ed448 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Ed448"/>
+    </condition>
+    <condition id="CycloneIPSEC CBC Dependencies">
+      <description>CycloneIPSEC CBC Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher Modes" Csub="CBC"/>
+    </condition>
+    <condition id="CycloneIPSEC CTR Dependencies">
+      <description>CycloneIPSEC CTR Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher Modes" Csub="CTR"/>
+    </condition>
+    <condition id="CycloneIPSEC CCM Dependencies">
+      <description>CycloneIPSEC CCM Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="AEAD" Csub="CCM"/>
+    </condition>
+    <condition id="CycloneIPSEC GCM Dependencies">
+      <description>CycloneIPSEC GCM Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="AEAD" Csub="GCM"/>
+    </condition>
+    <condition id="CycloneIPSEC ChaCha20Poly1305 Dependencies">
+      <description>CycloneIPSEC ChaCha20Poly1305 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="AEAD" Csub="ChaCha20Poly1305"/>
+    </condition>
+    <condition id="CycloneIPSEC IDEA Dependencies">
+      <description>CycloneIPSEC IDEA Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="IDEA"/>
+    </condition>
+    <condition id="CycloneIPSEC DES Dependencies">
+      <description>CycloneIPSEC DES Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="DES"/>
+    </condition>
+    <condition id="CycloneIPSEC Triple DES Dependencies">
+      <description>CycloneIPSEC Triple DES Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="Triple DES"/>
+    </condition>
+    <condition id="CycloneIPSEC AES Dependencies">
+      <description>CycloneIPSEC AES Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="AES"/>
+    </condition>
+    <condition id="CycloneIPSEC Camellia Dependencies">
+      <description>CycloneIPSEC Camellia Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="Camellia"/>
+    </condition>
+    <condition id="CycloneIPSEC CMAC Dependencies">
+      <description>CycloneIPSEC CMAC Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="CMAC"/>
+    </condition>
+    <condition id="CycloneIPSEC HMAC Dependencies">
+      <description>CycloneIPSEC HMAC Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
+    </condition>
+    <condition id="CycloneIPSEC MD5 Dependencies">
+      <description>CycloneIPSEC MD5 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="MD5"/>
+    </condition>
+    <condition id="CycloneIPSEC SHA-1 Dependencies">
+      <description>CycloneIPSEC SHA-1 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="SHA-1"/>
+    </condition>
+    <condition id="CycloneIPSEC SHA-256 Dependencies">
+      <description>CycloneIPSEC SHA-256 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="SHA-256"/>
+    </condition>
+    <condition id="CycloneIPSEC SHA-384 Dependencies">
+      <description>CycloneIPSEC SHA-384 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="SHA-384"/>
+    </condition>
+    <condition id="CycloneIPSEC SHA-512 Dependencies">
+      <description>CycloneIPSEC SHA-512 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="SHA-512"/>
+    </condition>
+    <condition id="CycloneIPSEC Tiger Dependencies">
+      <description>CycloneIPSEC Tiger Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="Tiger"/>
+    </condition>
+    <condition id="CycloneIPSEC ECP-192 Dependencies">
+      <description>CycloneIPSEC ECP-192 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC ECP-224 Dependencies">
+      <description>CycloneIPSEC ECP-224 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC ECP-256 Dependencies">
+      <description>CycloneIPSEC ECP-256 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC ECP-384 Dependencies">
+      <description>CycloneIPSEC ECP-384 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC ECP-521 Dependencies">
+      <description>CycloneIPSEC ECP-521 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC brainpoolP224r1 Dependencies">
+      <description>CycloneIPSEC brainpoolP224r1 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC brainpoolP256r1 Dependencies">
+      <description>CycloneIPSEC brainpoolP256r1 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC brainpoolP384r1 Dependencies">
+      <description>CycloneIPSEC brainpoolP384r1 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    <condition id="CycloneIPSEC brainpoolP512r1 Dependencies">
+      <description>CycloneIPSEC brainpoolP512r1 Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
+    </condition>
+    
     <!-- CycloneCRYPTO Dependencies -->
     <condition id="CycloneCRYPTO Dependencies">
       <description>CycloneCRYPTO Dependencies</description>
@@ -1580,6 +1781,18 @@
       <require Cclass="CycloneCRYPTO" Cgroup="MPI" Csub="Core"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="ASN.1"/>
     </condition>
+    <condition id="CycloneCRYPTO HKDF Dependencies">
+      <description>CycloneCRYPTO HKDF Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
+    </condition>
+    <condition id="CycloneCRYPTO PBKDF Dependencies">
+      <description>CycloneCRYPTO PBKDF Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
+    </condition>
+    <condition id="CycloneCRYPTO Concat KDF Dependencies">
+      <description>CycloneCRYPTO Concat KDF Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
+    </condition>
     <condition id="CycloneCRYPTO bcrypt Dependencies">
       <description>CycloneCRYPTO bcrypt Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher Modes" Csub="ECB"/>
@@ -1608,6 +1821,17 @@
       <description>CycloneCRYPTO PEM Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="Base64"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="ASN.1"/>
+    </condition>
+    <condition id="CycloneCRYPTO OCSP Core Dependencies">
+      <description>CycloneCRYPTO OCSP Core Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Validation"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="PEM File Import"/>
+    </condition>
+    <condition id="CycloneCRYPTO OCSP Client Dependencies">
+      <description>CycloneCRYPTO OCSP Client Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="OCSP" Csub="Core"/>
     </condition>
   </conditions>
   
@@ -1642,6 +1866,7 @@
     <description Cclass="CycloneTCP" Cgroup="TFTP">TFTP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="Icecast">Icecast Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="Modbus">Modbus/TCP Protocol</description>
+    <description Cclass="CycloneTCP" Cgroup="Syslog">Syslog Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="WebSocket">WebSocket Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="Ping">Ping Utility</description>
     <description Cclass="CycloneTCP" Cgroup="PPP">Point-to-Point Protocol</description>
@@ -1674,6 +1899,17 @@
     <description Cclass="CycloneSSH" Cgroup="Hash">Hash Functions</description>
     <description Cclass="CycloneSSH" Cgroup="Elliptic Curves">Elliptic Curves</description>
     
+    <description Cclass="CycloneIPSEC">IPsec Library</description>
+    <description Cclass="CycloneIPSEC" Cgroup="Authentication">Authentication Methods</description>
+    <description Cclass="CycloneIPSEC" Cgroup="Key Exchange">Key Exchange Algorithms</description>
+    <description Cclass="CycloneIPSEC" Cgroup="Signature">Signature Algorithms</description>
+    <description Cclass="CycloneIPSEC" Cgroup="Cipher Modes">Block Cipher Modes</description>
+    <description Cclass="CycloneIPSEC" Cgroup="AEAD">Authenticated Encryption with Associated Data</description>
+    <description Cclass="CycloneIPSEC" Cgroup="Cipher">Encryption Algorithms</description>
+    <description Cclass="CycloneIPSEC" Cgroup="MAC">MAC Algorithms</description>
+    <description Cclass="CycloneIPSEC" Cgroup="Hash">Hash Functions</description>
+    <description Cclass="CycloneIPSEC" Cgroup="Elliptic Curves">Elliptic Curves</description>
+    
     <description Cclass="CycloneSTP">Spanning Tree Protocol Library</description>
     <description Cclass="CycloneSTP" Cgroup="MIBs">MIB Bases</description>
     
@@ -1694,6 +1930,7 @@
     <description Cclass="CycloneCRYPTO" Cgroup="RNG">Random Number Generators</description>
     <description Cclass="CycloneCRYPTO" Cgroup="Encoding">Data Encoding Schemes</description>
     <description Cclass="CycloneCRYPTO" Cgroup="PKIX">Public-Key Infrastructure (X.509)</description>
+    <description Cclass="CycloneCRYPTO" Cgroup="OCSP">OCSP Protocol</description>
     <description Cclass="CycloneCRYPTO" Cgroup="Hardware">Hardware Cryptographic Accelerators</description>
   </taxonomy>
   
@@ -1701,7 +1938,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.2.4">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.3.0">
       <description>Common Files</description>
       <doc></doc>
       
@@ -1724,7 +1961,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_none.h"/>
           <file category="source" name="common/os_port_none.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1735,7 +1972,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_chibios.h"/>
           <file category="source" name="common/os_port_chibios.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1746,7 +1983,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_cmsis_rtos.h"/>
           <file category="source" name="common/os_port_cmsis_rtos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1757,7 +1994,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_cmsis_rtos2.h"/>
           <file category="source" name="common/os_port_cmsis_rtos2.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1768,7 +2005,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_embos.h"/>
           <file category="source" name="common/os_port_embos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1779,7 +2016,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_freertos.h"/>
           <file category="source" name="common/os_port_freertos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1790,7 +2027,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_rtx.h"/>
           <file category="source" name="common/os_port_rtx.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1801,7 +2038,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_threadx.h"/>
           <file category="source" name="common/os_port_threadx.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1812,7 +2049,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_ucos3.h"/>
           <file category="source" name="common/os_port_ucos3.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1823,7 +2060,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_ucos3.h"/>
           <file category="source" name="common/os_port_ucos3.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1834,7 +2071,7 @@
           <file category="header" name="common/fs_port.h"/>
           <file category="header" name="common/fs_port_fatfs.h"/>
           <file category="source" name="common/fs_port_fatfs.c"/>
-          <file category="header" name="config/fs_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/fs_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1845,7 +2082,7 @@
           <file category="header" name="common/fs_port.h"/>
           <file category="header" name="common/fs_port_rl_fs.h"/>
           <file category="source" name="common/fs_port_rl_fs.c"/>
-          <file category="header" name="config/fs_port_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/fs_port_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1880,7 +2117,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.2.4">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.3.0">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -1909,7 +2146,7 @@
           <file category="source" name="cyclone_tcp/core/ethernet_misc.c"/>
           <file category="source" name="cyclone_tcp/core/ip.c"/>
           
-          <file category="header" name="config/net_config.h" attr="config" version="2.1.4"/>
+          <file category="header" name="config/net_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -1956,12 +2193,14 @@
           <file category="header" name="cyclone_tcp/core/socket.h"/>
           <file category="header" name="cyclone_tcp/core/socket_misc.h"/>
           <file category="header" name="cyclone_tcp/core/bsd_socket.h"/>
+          <file category="header" name="cyclone_tcp/core/bsd_socket_options.h"/>
           <file category="header" name="cyclone_tcp/core/bsd_socket_misc.h"/>
           <file category="header" name="cyclone_tcp/core/raw_socket.h"/>
           
           <file category="source" name="cyclone_tcp/core/socket.c"/>
           <file category="source" name="cyclone_tcp/core/socket_misc.c"/>
           <file category="source" name="cyclone_tcp/core/bsd_socket.c"/>
+          <file category="source" name="cyclone_tcp/core/bsd_socket_options.c"/>
           <file category="source" name="cyclone_tcp/core/bsd_socket_misc.c"/>
           <file category="source" name="cyclone_tcp/core/raw_socket.c"/>
         </files>
@@ -2042,6 +2281,7 @@
           <file category="include" name="cyclone_tcp/"/>
           
           <file category="header" name="cyclone_tcp/ipv4/arp.h"/>
+          <file category="header" name="cyclone_tcp/ipv4/arp_cache.h"/>
           <file category="header" name="cyclone_tcp/ipv4/ipv4.h"/>
           <file category="header" name="cyclone_tcp/ipv4/ipv4_frag.h"/>
           <file category="header" name="cyclone_tcp/ipv4/ipv4_misc.h"/>
@@ -2049,6 +2289,7 @@
           <file category="header" name="cyclone_tcp/ipv4/icmp.h"/>
           
           <file category="source" name="cyclone_tcp/ipv4/arp.c"/>
+          <file category="source" name="cyclone_tcp/ipv4/arp_cache.c"/>
           <file category="source" name="cyclone_tcp/ipv4/ipv4.c"/>
           <file category="source" name="cyclone_tcp/ipv4/ipv4_frag.c"/>
           <file category="source" name="cyclone_tcp/ipv4/ipv4_misc.c"/>
@@ -3340,6 +3581,22 @@
         </files>
       </component>
       
+      <component Cgroup="Syslog" Csub="Syslog Client" condition="CycloneTCP Syslog Client Dependencies">
+        <description>Syslog Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_SYSLOG_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/syslog/syslog_client.h"/>
+          <file category="header" name="cyclone_tcp/syslog/syslog_client_misc.h"/>
+          
+          <file category="source" name="cyclone_tcp/syslog/syslog_client.c"/>
+          <file category="source" name="cyclone_tcp/syslog/syslog_client_misc.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="WebSocket" Csub="Core" Cvariant="TCP" isDefaultVariant="true" condition="CycloneTCP WebSocket Dependencies">
         <description>Non-Secure WebSocket</description>
         <RTE_Components_h>
@@ -3481,6 +3738,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="APM32F4" condition="CycloneTCP Core Dependencies">
+        <description>Geehy APM32F4 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/apm32f4xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/apm32f4xx_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="GD32F3" condition="CycloneTCP Core Dependencies">
         <description>GigaDevice GD32F3 Ethernet MAC controller</description>
         <files>
@@ -3490,12 +3756,30 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="GD32F2" condition="CycloneTCP Core Dependencies">
+        <description>GigaDevice GD32F2 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/gd32f2xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/gd32f2xx_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="GD32F4" condition="CycloneTCP Core Dependencies">
         <description>GigaDevice GD32F4 Ethernet MAC controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/mac/gd32f4xx_eth_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/mac/gd32f4xx_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="GD32E5" condition="CycloneTCP Core Dependencies">
+        <description>GigaDevice GD32E5 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/gd32e5xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/gd32e5xx_eth_driver.c"/>
         </files>
       </component>
       
@@ -4761,6 +5045,24 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Ethernet)" Csub="LAN8560" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8560 10Base-T1S controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/lan8560_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/lan8560_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Ethernet)" Csub="LAN8561" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8561 10Base-T1S controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/lan8561_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/lan8561_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Ethernet)" Csub="LAN9250" condition="CycloneTCP Core Dependencies">
         <description>Microchip LAN9250 Ethernet controller</description>
         <files>
@@ -4998,7 +5300,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.2.4">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.3.0">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -5052,7 +5354,7 @@
           <file category="source" name="cyclone_ssl/tls13_ticket.c"/>
           <file category="source" name="cyclone_ssl/tls13_misc.c"/>
           
-          <file category="header" name="config/tls_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/tls_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -5701,7 +6003,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.2.4">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.3.0">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -5723,7 +6025,7 @@
           <file category="header" name="cyclone_ssh/ssh/ssh_kex_dh.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_kex_dh_gex.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_kex_ecdh.h"/>
-          <file category="header" name="cyclone_ssh/ssh/ssh_kex_hbr.h"/>
+          <file category="header" name="cyclone_ssh/ssh/ssh_kex_hybrid.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_auth.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_connection.h"/>
           <file category="header" name="cyclone_ssh/ssh/ssh_request.h"/>
@@ -5756,6 +6058,7 @@
           <file category="source" name="cyclone_ssh/ssh/ssh_kex_dh.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_kex_dh_gex.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_kex_ecdh.c"/>
+          <file category="source" name="cyclone_ssh/ssh/ssh_kex_hybrid.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_auth.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_connection.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_request.c"/>
@@ -5779,7 +6082,7 @@
           <file category="source" name="cyclone_ssh/ssh/ssh_sign_misc.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_misc.c"/>
           
-          <file category="header" name="config/ssh_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/ssh_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -5951,7 +6254,7 @@
       </component>
       
       <component Cgroup="Key Exchange" Csub="RSA" condition="CycloneSSH RSA Dependencies">
-        <description>RSA Exchange</description>
+        <description>RSA Key Exchange</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_SSH_RSA_KEX
         </RTE_Components_h>
@@ -6276,8 +6579,514 @@
       </component>
     </bundle>
     
+    <!-- CycloneIPSEC -->
+    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.3.0">
+      <description>IPsec/IKEv2 Library</description>
+      <doc></doc>
+      
+      <component Cgroup="IPsec" condition="CycloneIPSEC IPsec Dependencies">
+        <description>IPsec Protocol</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_IPSEC
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ipsec/"/>
+          
+          <file category="header" name="cyclone_ipsec/ipsec/ipsec.h"/>
+          <file category="header" name="cyclone_ipsec/ipsec/ipsec_inbound.h"/>
+          <file category="header" name="cyclone_ipsec/ipsec/ipsec_outbound.h"/>
+          <file category="header" name="cyclone_ipsec/ipsec/ipsec_anti_replay.h"/>
+          <file category="header" name="cyclone_ipsec/ipsec/ipsec_misc.h"/>
+          
+          <file category="source" name="cyclone_ipsec/ipsec/ipsec.c"/>
+          <file category="source" name="cyclone_ipsec/ipsec/ipsec_inbound.c"/>
+          <file category="source" name="cyclone_ipsec/ipsec/ipsec_outbound.c"/>
+          <file category="source" name="cyclone_ipsec/ipsec/ipsec_anti_replay.c"/>
+          <file category="source" name="cyclone_ipsec/ipsec/ipsec_misc.c"/>
+          
+          <file category="header" name="config/ipsec_config.h" attr="config" version="2.3.0"/>
+        </files>
+      </component>
+      
+      <component Cgroup="AH" condition="CycloneIPSEC AH Dependencies">
+        <description>AH Protocol</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_AH
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ipsec/"/>
+          
+          <file category="header" name="cyclone_ipsec/ah/ah.h"/>
+          <file category="header" name="cyclone_ipsec/ah/ah_algorithms.h"/>
+          
+          <file category="source" name="cyclone_ipsec/ah/ah.c"/>
+          <file category="source" name="cyclone_ipsec/ah/ah_algorithms.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="ESP" condition="CycloneIPSEC ESP Dependencies">
+        <description>ESP Protocol</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ESP
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ipsec/"/>
+          
+          <file category="header" name="cyclone_ipsec/esp/esp.h"/>
+          <file category="header" name="cyclone_ipsec/esp/esp_algorithms.h"/>
+          <file category="header" name="cyclone_ipsec/esp/esp_packet_encrypt.h"/>
+          <file category="header" name="cyclone_ipsec/esp/esp_packet_decrypt.h"/>
+          
+          <file category="source" name="cyclone_ipsec/esp/esp.c"/>
+          <file category="source" name="cyclone_ipsec/esp/esp_algorithms.c"/>
+          <file category="source" name="cyclone_ipsec/esp/esp_packet_encrypt.c"/>
+          <file category="source" name="cyclone_ipsec/esp/esp_packet_decrypt.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="IKE" condition="CycloneIPSEC IKE Dependencies">
+        <description>IKEv2 Protocol</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_IKE
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ipsec/"/>
+          
+          <file category="header" name="cyclone_ipsec/ike/ike.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_algorithms.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_fsm.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_auth.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_key_exchange.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_key_material.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_dh_groups.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_message_format.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_message_parse.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_message_encrypt.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_message_decrypt.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_payload_format.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_payload_parse.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_debug.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_misc.h"/>
+          
+          <file category="source" name="cyclone_ipsec/ike/ike.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_algorithms.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_fsm.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_auth.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_key_exchange.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_key_material.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_dh_groups.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_message_format.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_message_parse.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_message_encrypt.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_message_decrypt.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_payload_format.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_payload_parse.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_debug.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Authentication" Csub="Certificate" condition="CycloneIPSEC Certificate Dependencies">
+        <description>Certificate Authentication</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CERT_AUTH
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_ipsec/"/>
+          
+          <file category="header" name="cyclone_ipsec/ike/ike_certificate.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_sign_generate.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_sign_verify.h"/>
+          <file category="header" name="cyclone_ipsec/ike/ike_sign_misc.h"/>
+          
+          <file category="source" name="cyclone_ipsec/ike/ike_certificate.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_sign_generate.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_sign_verify.c"/>
+          <file category="source" name="cyclone_ipsec/ike/ike_sign_misc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Authentication" Csub="PSK" condition="CycloneIPSEC PSK Dependencies">
+        <description>Pre-Shared Key Authentication</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_PSK_AUTH
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange" Csub="Diffie-Hellman" condition="CycloneIPSEC Diffie-Hellman Dependencies">
+        <description>Diffie-Hellman Key Exchange</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_DH_KE
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange" Csub="ECDH" condition="CycloneIPSEC ECDH Dependencies">
+        <description>ECDH Key Exchange</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ECDH_KE
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange" Csub="Curve25519" condition="CycloneIPSEC Curve25519 Dependencies">
+        <description>Curve25519 Key Exchange</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CURVE25519
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Key Exchange" Csub="Curve448" condition="CycloneIPSEC Curve448 Dependencies">
+        <description>Curve448 Key Exchange</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CURVE448
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Signature" Csub="RSA" condition="CycloneIPSEC RSA Dependencies">
+        <description>RSA Signature</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_RSA_SIGN
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Signature" Csub="RSA-PSS" condition="CycloneIPSEC RSA Dependencies">
+        <description>RSA-PSS Signature</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_RSA_PSS_SIGN
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Signature" Csub="DSA" condition="CycloneIPSEC DSA Dependencies">
+        <description>DSA Signature</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_DSA_SIGN
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Signature" Csub="ECDSA" condition="CycloneIPSEC ECDSA Dependencies">
+        <description>ECDSA Signature</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ECDSA_SIGN
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Signature" Csub="Ed25519" condition="CycloneIPSEC Ed25519 Dependencies">
+        <description>Ed25519 Signature</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ED25519_SIGN
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Signature" Csub="Ed448" condition="CycloneIPSEC Ed448 Dependencies">
+        <description>Ed448 Signature</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ED448_SIGN
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher Modes" Csub="CBC" condition="CycloneIPSEC CBC Dependencies">
+        <description>CBC Cipher Mode</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CBC
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher Modes" Csub="CTR" condition="CycloneIPSEC CTR Dependencies">
+        <description>CTR Cipher Mode</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CTR
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="CCM_8" condition="CycloneIPSEC CCM Dependencies">
+        <description>CCM_8 AEAD</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CCM_8
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="CCM_12" condition="CycloneIPSEC CCM Dependencies">
+        <description>CCM_12 AEAD</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CCM_12
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="CCM_16" condition="CycloneIPSEC CCM Dependencies">
+        <description>CCM_16 AEAD</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CCM_16
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="GCM_8" condition="CycloneIPSEC GCM Dependencies">
+        <description>GCM_8 AEAD</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_GCM_8
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="GCM_12" condition="CycloneIPSEC GCM Dependencies">
+        <description>GCM_12 AEAD</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_GCM_12
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="GCM_16" condition="CycloneIPSEC GCM Dependencies">
+        <description>GCM_16 AEAD</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_GCM_16
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="ChaCha20Poly1305" condition="CycloneIPSEC ChaCha20Poly1305 Dependencies">
+        <description>ChaCha20Poly1305 AEAD</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CHACHA20POLY1305
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="MAC" Csub="CMAC" condition="CycloneIPSEC CMAC Dependencies">
+        <description>CMAC Message Authentication Code</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CMAC
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="MAC" Csub="HMAC" condition="CycloneIPSEC HMAC Dependencies">
+        <description>HMAC Message Authentication Code</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_HMAC
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="IDEA" condition="CycloneIPSEC IDEA Dependencies">
+        <description>IDEA Block Cipher (insecure)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_IDEA
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="DES" condition="CycloneIPSEC DES Dependencies">
+        <description>DES Block Cipher (insecure)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_DES
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="Triple DES" condition="CycloneIPSEC Triple DES Dependencies">
+        <description>Triple DES Block Cipher (weak)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_3DES
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="AES" condition="CycloneIPSEC AES Dependencies">
+        <description>AES Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_AES
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Cipher" Csub="Camellia" condition="CycloneIPSEC Camellia Dependencies">
+        <description>Camellia Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_CAMELLIA
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Hash" Csub="MD5" condition="CycloneIPSEC MD5 Dependencies">
+        <description>MD5 Hash Function (insecure)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_MD5
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Hash" Csub="SHA-1" condition="CycloneIPSEC SHA-1 Dependencies">
+        <description>SHA-1 Hash Function (weak)</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_SHA1
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Hash" Csub="SHA-256" condition="CycloneIPSEC SHA-256 Dependencies">
+        <description>SHA-256 Hash Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_SHA256
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Hash" Csub="SHA-384" condition="CycloneIPSEC SHA-384 Dependencies">
+        <description>SHA-384 Hash Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_SHA384
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Hash" Csub="SHA-512" condition="CycloneIPSEC SHA-512 Dependencies">
+        <description>SHA-512 Hash Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_SHA512
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Hash" Csub="Tiger" condition="CycloneIPSEC Tiger Dependencies">
+        <description>Tiger Hash Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_TIGER
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="ECP-192" condition="CycloneIPSEC ECP-192 Dependencies">
+        <description>ECP-192 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ECP_192
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="ECP-224" condition="CycloneIPSEC ECP-224 Dependencies">
+        <description>ECP-224 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ECP_224
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="ECP-256" condition="CycloneIPSEC ECP-256 Dependencies">
+        <description>ECP-256 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ECP_256
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="ECP-384" condition="CycloneIPSEC ECP-384 Dependencies">
+        <description>ECP-384 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ECP_384
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="ECP-521" condition="CycloneIPSEC ECP-521 Dependencies">
+        <description>ECP-521 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_ECP_521
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="brainpoolP224r1" condition="CycloneIPSEC brainpoolP224r1 Dependencies">
+        <description>brainpoolP224r1 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_BRAINPOOLP224R1
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="brainpoolP256r1" condition="CycloneIPSEC brainpoolP256r1 Dependencies">
+        <description>brainpoolP256r1 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_BRAINPOOLP256R1
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="brainpoolP384r1" condition="CycloneIPSEC brainpoolP384r1 Dependencies">
+        <description>brainpoolP384r1 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_BRAINPOOLP384R1
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
+      <component Cgroup="Elliptic Curves" Csub="brainpoolP512r1" condition="CycloneIPSEC brainpoolP512r1 Dependencies">
+        <description>brainpoolP512r1 Elliptic Curve</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_BRAINPOOLP512R1
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+    </bundle>
+    
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.2.4">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.3.0">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -6289,7 +7098,7 @@
         <files>
           <file category="include" name="cyclone_stp/"/>
           <file category="header" name="cyclone_stp/stp/stp_common.h"/>
-          <file category="header" name="config/stp_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/stp_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -6408,7 +7217,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.2.4">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.3.0">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -6419,7 +7228,7 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_acme/"/>
-          <file category="header" name="config/acme_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/acme_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -6490,7 +7299,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.2.4">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.3.0">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -6508,7 +7317,7 @@
           <file category="header" name="cyclone_crypto/cipher_modes/cipher_modes.h"/>
           <file category="header" name="cyclone_crypto/aead/aead_algorithms.h"/>
           <file category="header" name="cyclone_crypto/mac/mac_algorithms.h"/>
-          <file category="header" name="config/crypto_config.h" attr="config" version="2.2.0"/>
+          <file category="header" name="config/crypto_config.h" attr="config" version="2.3.0"/>
         </files>
       </component>
       
@@ -7352,7 +8161,7 @@
         </files>
       </component>
       
-      <component Cgroup="KDF" Csub="HKDF" condition="CycloneCRYPTO Core Dependencies">
+      <component Cgroup="KDF" Csub="HKDF" condition="CycloneCRYPTO HKDF Dependencies">
         <description>HMAC-based Key Derivation Function</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_CRYPTO_HKDF
@@ -7364,7 +8173,7 @@
         </files>
       </component>
       
-      <component Cgroup="KDF" Csub="PBKDF" condition="CycloneCRYPTO Core Dependencies">
+      <component Cgroup="KDF" Csub="PBKDF" condition="CycloneCRYPTO PBKDF Dependencies">
         <description>Password-Based Key Derivation Function</description>
         <RTE_Components_h>
           #define RTE_CYCLONE_CRYPTO_PBKDF
@@ -7373,6 +8182,18 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/kdf/pbkdf.h"/>
           <file category="source" name="cyclone_crypto/kdf/pbkdf.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="KDF" Csub="Concat KDF" condition="CycloneCRYPTO Concat KDF Dependencies">
+        <description>Concatenation Key Derivation Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_CONCAT_KDF
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/kdf/concat_kdf.h"/>
+          <file category="source" name="cyclone_crypto/kdf/concat_kdf.c"/>
         </files>
       </component>
       
@@ -7640,11 +8461,13 @@
           <file category="include" name="cyclone_crypto/"/>
           
           <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
           <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
@@ -7659,12 +8482,16 @@
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_format.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_cert_create.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_format.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_format.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_generate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_cert_create.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_format.c"/>
@@ -7681,15 +8508,17 @@
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
-          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_verify.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
-          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_verify.c"/>
@@ -7706,12 +8535,16 @@
           <file category="include" name="cyclone_crypto/"/>
           
           <file category="header" name="cyclone_crypto/pkix/x509_crl_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_crl_ext_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
           <file category="source" name="cyclone_crypto/pkix/x509_crl_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_crl_ext_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
         </files>
@@ -7725,19 +8558,24 @@
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
-          <file category="header" name="cyclone_crypto/pkix/x509_crl_validate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_crl_parse.h"/>
-          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_crl_ext_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_crl_validate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_verify.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
-          <file category="source" name="cyclone_crypto/pkix/x509_crl_validate.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_crl_parse.c"/>
-          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_crl_ext_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_crl_validate.c"/>
+
           <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_verify.c"/>
@@ -7755,11 +8593,13 @@
           
           <file category="header" name="cyclone_crypto/pkix/x509_csr_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
           <file category="source" name="cyclone_crypto/pkix/x509_csr_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
         </files>
@@ -7773,14 +8613,20 @@
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
+          <file category="header" name="cyclone_crypto/pkix/x509_csr_format.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_csr_create.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_format.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_format.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_cert_create.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_format.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_format.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_generate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
+          <file category="source" name="cyclone_crypto/pkix/x509_csr_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_csr_create.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_format.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_cert_create.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_format.c"/>
@@ -7798,16 +8644,18 @@
           <file category="include" name="cyclone_crypto/"/>
           
           <file category="header" name="cyclone_crypto/pkix/x509_csr_validate.h"/>
-          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_cert_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_ext_parse.h"/>
+          <file category="header" name="cyclone_crypto/pkix/x509_cert_validate.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_sign_verify.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
           
           <file category="source" name="cyclone_crypto/pkix/x509_csr_validate.c"/>
-          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_cert_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_ext_parse.c"/>
+          <file category="source" name="cyclone_crypto/pkix/x509_cert_validate.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_sign_verify.c"/>
@@ -7863,7 +8711,79 @@
         </files>
       </component>
       
+      <component Cgroup="OCSP" Csub="Core" condition="CycloneCRYPTO OCSP Core Dependencies">
+        <description>OCSP Core</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_OCSP
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/ocsp/ocsp_req_format.h"/>
+          <file category="header" name="cyclone_crypto/ocsp/ocsp_req_create.h"/>
+          <file category="header" name="cyclone_crypto/ocsp/ocsp_resp_parse.h"/>
+          <file category="header" name="cyclone_crypto/ocsp/ocsp_resp_validate.h"/>
+          <file category="header" name="cyclone_crypto/ocsp/ocsp_common.h"/>
+          
+          <file category="source" name="cyclone_crypto/ocsp/ocsp_req_format.c"/>
+          <file category="source" name="cyclone_crypto/ocsp/ocsp_req_create.c"/>
+          <file category="source" name="cyclone_crypto/ocsp/ocsp_resp_parse.c"/>
+          <file category="source" name="cyclone_crypto/ocsp/ocsp_resp_validate.c"/>
+          <file category="source" name="cyclone_crypto/ocsp/ocsp_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="OCSP" Csub="OCSP Client" condition="CycloneCRYPTO OCSP Client Dependencies">
+        <description>OCSP Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_OCSP_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/ocsp/ocsp_client.h"/>
+          <file category="header" name="cyclone_crypto/ocsp/ocsp_client_misc.h"/>
+          
+          <file category="source" name="cyclone_crypto/ocsp/ocsp_client.c"/>
+          <file category="source" name="cyclone_crypto/ocsp/ocsp_client_misc.c"/>
+        </files>
+      </component>
+      
       <!-- Hardware Cryptographic Accelerators -->
+      <component Cgroup="Hardware" Csub="APM32F4" condition="CycloneCRYPTO Core Dependencies">
+        <description>Geehy APM32F4 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/apm32f4xx/apm32f4xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="GD32F2" condition="CycloneCRYPTO Core Dependencies">
+        <description>GigaDevice GD32F2 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/gd32f2xx/gd32f2xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Hardware" Csub="GD32F4" condition="CycloneCRYPTO Core Dependencies">
         <description>GigaDevice GD32F4 Cryptographic Accelerator</description>
         <files>
@@ -7874,6 +8794,25 @@
           
           <file category="source" name="cyclone_crypto/hardware/gd32f4xx/gd32f4xx_crypto.c"/>
           <file category="source" name="cyclone_crypto/hardware/gd32f4xx/gd32f4xx_crypto_trng.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="GD32W5" condition="CycloneCRYPTO Core Dependencies">
+        <description>GigaDevice GD32W5 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/gd32w5xx/gd32w5xx_crypto_pkc.c"/>
         </files>
       </component>
       
@@ -8686,6 +9625,25 @@
           <file category="source" name="cyclone_crypto/hardware/stm32wbxx/stm32wbxx_crypto_trng.c"/>
           <file category="source" name="cyclone_crypto/hardware/stm32wbxx/stm32wbxx_crypto_cipher.c"/>
           <file category="source" name="cyclone_crypto/hardware/stm32wbxx/stm32wbxx_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32WBAxx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32WBA Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32wbaxx/stm32wbaxx_crypto_pkc.c"/>
         </files>
       </component>
       
