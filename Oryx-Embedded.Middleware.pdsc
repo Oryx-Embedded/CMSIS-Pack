@@ -10,6 +10,22 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.3.2" date="2023-10-02">
+      - Added support for BSD socket option SO_TYPE (read-only option)
+      - Added Ethernet MAC driver for Microchip PIC32CK GC01/SG01
+      - Added Ethernet MAC driver for Nuvoton M467 series
+      - Added Ethernet MAC driver for TI Sitara AM243x (dual Gigabit Ethernet MAC)
+      - Added driver for NXP TJA1102 (dual port 100Base-T1 PHY)
+      - Added driver for Realtek RTL8201 Ethernet PHY
+      - Added driver for Renesas ICS1894-32 Ethernet PHY
+      - Added driver for Microchip WINC3400 Wi-Fi controller
+      - Added support for Extended Sequence Numbers in AH and ESP protocols (CycloneIPSEC)
+      - Fixed several non-conformance issues in IKE implementation (CycloneIPSEC)
+      - Added support for SM3 hash function and SM4 block cipher algorithm
+      - Added support for XCBC-MAC message authentication code
+      - Added support for SAM S70 hardware cryptographic accelerator (TRNG, ICM and AES peripherals)
+      - Hardware-assisted AES-CCM implementation for Renesas RA4 and RA6 series
+    </release>
     <release version="2.3.0" date="2023-06-12">
       - New IPsec/IKEv2 library (CycloneIPSEC)
       - Added Syslog client implementation (as per RFC 3164)
@@ -23,7 +39,7 @@
       - Callback mechanism that allows parsing/formatting of custom DHCP options at server side
       - Callback mechanism for adding custom options in RA messages transmitted by the IPv6 Router
       - Fixed incorrect timeout calculation in LLDP implementation in TX/RX mode that results in a tick period larger than nominal 1s value
-      - Added drivers for Microchip LAN8560 and LAN8561 (10Base-T1S MAC+PHY controllers with SPI interface)
+      - Added drivers for Microchip LAN8650 and LAN8651 (10Base-T1S MAC+PHY controllers with SPI interface)
       - Added support for post-quantum hybrid SSH key exchange (Kyber-512/768/1024 and Streamlined NTRU Prime 761 KEMs are supported)
       - Added OCSP client implementation (as per RFC 6960)
       - Concat KDF key derivation function
@@ -1121,15 +1137,15 @@
       <require Cclass="CycloneSSL" Cgroup="Core"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="Camellia"/>
     </condition>
-    <condition id="CycloneSSL SEED Dependencies">
-      <description>CycloneSSL SEED Dependencies</description>
-      <require Cclass="CycloneSSL" Cgroup="Core"/>
-      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="SEED"/>
-    </condition>
     <condition id="CycloneSSL ARIA Dependencies">
       <description>CycloneSSL ARIA Dependencies</description>
       <require Cclass="CycloneSSL" Cgroup="Core"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="ARIA"/>
+    </condition>
+    <condition id="CycloneSSL SEED Dependencies">
+      <description>CycloneSSL SEED Dependencies</description>
+      <require Cclass="CycloneSSL" Cgroup="Core"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="SEED"/>
     </condition>
     <condition id="CycloneSSL MD5 Dependencies">
       <description>CycloneSSL MD5 Dependencies</description>
@@ -1579,6 +1595,10 @@
       <description>CycloneIPSEC HMAC Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
     </condition>
+    <condition id="CycloneIPSEC XCBC-MAC Dependencies">
+      <description>CycloneIPSEC XCBC-MAC Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="XCBC-MAC"/>
+    </condition>
     <condition id="CycloneIPSEC MD5 Dependencies">
       <description>CycloneIPSEC MD5 Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="MD5"/>
@@ -1938,7 +1958,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.3.0">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.3.2">
       <description>Common Files</description>
       <doc></doc>
       
@@ -2117,7 +2137,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.3.0">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.3.2">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -3980,6 +4000,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="M467" condition="CycloneTCP Core Dependencies">
+        <description>Nuvoton M467 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/m467_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/m467_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="M487" condition="CycloneTCP Core Dependencies">
         <description>Nuvoton M487 Ethernet MAC controller</description>
         <files>
@@ -4351,6 +4380,24 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="AM243x" condition="CycloneTCP Core Dependencies">
+        <description>TI Sitara AM243x Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/am243x_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/am243x_eth_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (MAC)" Csub="AM64x" condition="CycloneTCP Core Dependencies">
+        <description>TI Sitara AM64x Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/am64x_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/am64x_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="Zynq-7000" condition="CycloneTCP Core Dependencies">
         <description>Xilinx Zynq-7000 Ethernet MAC controller</description>
         <files>
@@ -4649,6 +4696,24 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="TJA1102" condition="CycloneTCP Core Dependencies">
+        <description>NXP TJA1102 100Base-T1 PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/tja1102_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/tja1102_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="RTL8201" condition="CycloneTCP Core Dependencies">
+        <description>Realtek RTL8201 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/rtl8201_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/rtl8201_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (PHY)" Csub="RTL8211E" condition="CycloneTCP Core Dependencies">
         <description>Realtek RTL8211E Ethernet PHY transceiver</description>
         <files>
@@ -4664,6 +4729,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/rtl8211f_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/phy/rtl8211f_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="ICS1894" condition="CycloneTCP Core Dependencies">
+        <description>Renesas ICS1894-32 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/ics1894_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/ics1894_driver.c"/>
         </files>
       </component>
       
@@ -5045,21 +5119,21 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (Ethernet)" Csub="LAN8560" condition="CycloneTCP Core Dependencies">
-        <description>Microchip LAN8560 10Base-T1S controller</description>
+      <component Cgroup="Drivers (Ethernet)" Csub="LAN8650" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8650 10Base-T1S controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/eth/lan8560_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/eth/lan8560_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/lan8650_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/lan8650_driver.c"/>
         </files>
       </component>
       
-      <component Cgroup="Drivers (Ethernet)" Csub="LAN8561" condition="CycloneTCP Core Dependencies">
-        <description>Microchip LAN8561 10Base-T1S controller</description>
+      <component Cgroup="Drivers (Ethernet)" Csub="LAN8651" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8651 10Base-T1S controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/eth/lan8561_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/eth/lan8561_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/eth/lan8651_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/eth/lan8651_driver.c"/>
         </files>
       </component>
       
@@ -5108,6 +5182,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Wi-Fi)" Csub="BCM43362" condition="CycloneTCP Core Dependencies">
+        <description>Cypress BCM43362 Wi-Fi controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/wifi/bcm43362_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/wifi/bcm43362_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Wi-Fi)" Csub="WILC1000" condition="CycloneTCP Core Dependencies">
         <description>Microchip WILC1000 Wi-Fi controller</description>
         <files>
@@ -5115,78 +5198,78 @@
           <file category="header" name="cyclone_tcp/drivers/wifi/wilc1000_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/wifi/wilc1000_driver.c"/>
           
-          <file category="include" name="third_party/atmel/wilc1000/"/>
+          <file category="include" name="third_party/microchip/wilc1000/"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/bus_wrapper/include/nm_bus_wrapper.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/common/include/nm_common.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/include/m2m_periph.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/include/m2m_types.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/include/m2m_wifi.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/include/wifi_firmware_1000b.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/source/m2m_hif.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/source/nmasic.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/source/nmbus.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/source/nmdrv.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/driver/source/nmspi.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/drv_hash/crypto.h"/>
-          <file category="header" name="third_party/atmel/wilc1000/os/include/m2m_wifi_ex.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/bus_wrapper/include/nm_bus_wrapper.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/common/include/nm_common.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/include/m2m_periph.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/include/m2m_types.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/include/m2m_wifi.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/include/wifi_firmware_1000b.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/source/m2m_hif.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/source/nmasic.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/source/nmbus.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/source/nmdrv.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/driver/source/nmspi.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/drv_hash/crypto.h"/>
+          <file category="header" name="third_party/microchip/wilc1000/os/include/m2m_wifi_ex.h"/>
           
-          <file category="source" name="third_party/atmel/wilc1000/common/source/nm_common.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/m2m_hif.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/m2m_periph.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/m2m_wifi.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/nmasic.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/nmbus.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/nmdrv.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/nmspi.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/driver/source/spi_flash.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/drv_hash/PMK.c"/>
-          <file category="source" name="third_party/atmel/wilc1000/os/source/m2m_wifi_ex.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/common/source/nm_common.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/m2m_hif.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/m2m_periph.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/m2m_wifi.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/nmasic.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/nmbus.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/nmdrv.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/nmspi.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/driver/source/spi_flash.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/drv_hash/PMK.c"/>
+          <file category="source" name="third_party/microchip/wilc1000/os/source/m2m_wifi_ex.c"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_sam4e.h" condition="SAM4E"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_sam4e.c" condition="SAM4E"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_sam4e.c" condition="SAM4E"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_sam4e.h" condition="SAM4E"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_sam4e.c" condition="SAM4E"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_sam4e.c" condition="SAM4E"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_sam4s.h" condition="SAM4S"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_sam4s.c" condition="SAM4S"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_sam4s.c" condition="SAM4S"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_sam4s.h" condition="SAM4S"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_sam4s.c" condition="SAM4S"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_sam4s.c" condition="SAM4S"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_same54.h" condition="SAME54"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_same54.c" condition="SAME54"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_same54.c" condition="SAME54"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_same54.h" condition="SAME54"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_same54.c" condition="SAME54"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_same54.c" condition="SAME54"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_same70.h" condition="SAME70"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_same70.c" condition="SAME70"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_same70.c" condition="SAME70"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_same70.h" condition="SAME70"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_same70.c" condition="SAME70"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_same70.c" condition="SAME70"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_samv71.h" condition="SAMV71"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_samv71.c" condition="SAMV71"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_samv71.c" condition="SAMV71"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_samv71.h" condition="SAMV71"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_samv71.c" condition="SAMV71"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_samv71.c" condition="SAMV71"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_stm32f1xx.h" condition="STM32F1"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_stm32f1xx.c" condition="STM32F1"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f1xx.c" condition="STM32F1"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_stm32f1xx.h" condition="STM32F1"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_stm32f1xx.c" condition="STM32F1"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f1xx.c" condition="STM32F1"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_stm32f2xx.h" condition="STM32F2"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_stm32f2xx.c" condition="STM32F2"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f2xx.c" condition="STM32F2"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_stm32f2xx.h" condition="STM32F2"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_stm32f2xx.c" condition="STM32F2"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f2xx.c" condition="STM32F2"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_stm32f4xx.h" condition="STM32F4"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_stm32f4xx.c" condition="STM32F4"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f4xx.c" condition="STM32F4"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_stm32f4xx.h" condition="STM32F4"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_stm32f4xx.c" condition="STM32F4"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f4xx.c" condition="STM32F4"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_stm32f7xx.h" condition="STM32F7"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_stm32f7xx.c" condition="STM32F7"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f7xx.c" condition="STM32F7"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_stm32f7xx.h" condition="STM32F7"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_stm32f7xx.c" condition="STM32F7"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32f7xx.c" condition="STM32F7"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_stm32h7xx.h" condition="STM32H7"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_stm32h7xx.c" condition="STM32H7"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32h7xx.c" condition="STM32H7"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_stm32h7xx.h" condition="STM32H7"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_stm32h7xx.c" condition="STM32H7"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32h7xx.c" condition="STM32H7"/>
           
-          <file category="header" name="third_party/atmel/wilc1000/bsp/include/nm_bsp_stm32l4xx.h" condition="STM32L4"/>
-          <file category="source" name="third_party/atmel/wilc1000/bsp/source/nm_bsp_stm32l4xx.c" condition="STM32L4"/>
-          <file category="source" name="third_party/atmel/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32l4xx.c" condition="STM32L4"/>
+          <file category="header" name="third_party/microchip/wilc1000/bsp/include/nm_bsp_stm32l4xx.h" condition="STM32L4"/>
+          <file category="source" name="third_party/microchip/wilc1000/bsp/source/nm_bsp_stm32l4xx.c" condition="STM32L4"/>
+          <file category="source" name="third_party/microchip/wilc1000/bus_wrapper/source/nm_bus_wrapper_stm32l4xx.c" condition="STM32L4"/>
         </files>
       </component>
       
@@ -5197,77 +5280,175 @@
           <file category="header" name="cyclone_tcp/drivers/wifi/winc1500_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/wifi/winc1500_driver.c"/>
           
-          <file category="include" name="third_party/atmel/winc1500/"/>
+          <file category="include" name="third_party/microchip/winc1500/"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp.h"/>
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_internal.h"/>
-          <file category="header" name="third_party/atmel/winc1500/bus_wrapper/include/nm_bus_wrapper.h"/>
-          <file category="header" name="third_party/atmel/winc1500/common/include/nm_common.h"/>
-          <file category="header" name="third_party/atmel/winc1500/common/include/nm_debug.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/include/m2m_ate_mode.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/include/m2m_crypto.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/include/m2m_ota.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/include/m2m_periph.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/include/m2m_types.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/include/m2m_wifi.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/source/m2m_hif.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/source/nmasic.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/source/nmbus.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/source/nmi2c.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/source/nmdrv.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/source/nmspi.h"/>
-          <file category="header" name="third_party/atmel/winc1500/driver/source/nmuart.h"/>
-          <file category="header" name="third_party/atmel/winc1500/spi_flash/include/spi_flash.h"/>
-          <file category="header" name="third_party/atmel/winc1500/spi_flash/include/spi_flash_map.h"/>
-          <file category="header" name="third_party/atmel/winc1500/os/include/m2m_wifi_ex.h"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp.h"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_internal.h"/>
+          <file category="header" name="third_party/microchip/winc1500/bus_wrapper/include/nm_bus_wrapper.h"/>
+          <file category="header" name="third_party/microchip/winc1500/common/include/nm_common.h"/>
+          <file category="header" name="third_party/microchip/winc1500/common/include/nm_debug.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/include/m2m_ate_mode.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/include/m2m_crypto.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/include/m2m_ota.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/include/m2m_periph.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/include/m2m_types.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/include/m2m_wifi.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/source/m2m_hif.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/source/nmasic.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/source/nmbus.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/source/nmi2c.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/source/nmdrv.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/source/nmspi.h"/>
+          <file category="header" name="third_party/microchip/winc1500/driver/source/nmuart.h"/>
+          <file category="header" name="third_party/microchip/winc1500/spi_flash/include/spi_flash.h"/>
+          <file category="header" name="third_party/microchip/winc1500/spi_flash/include/spi_flash_map.h"/>
+          <file category="header" name="third_party/microchip/winc1500/os/include/m2m_wifi_ex.h"/>
           
-          <file category="source" name="third_party/atmel/winc1500/common/source/nm_common.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/m2m_ate_mode.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/m2m_crypto.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/m2m_hif.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/m2m_ota.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/m2m_periph.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/m2m_wifi.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/nmasic.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/nmbus.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/nmdrv.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/nmi2c.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/nmspi.c"/>
-          <file category="source" name="third_party/atmel/winc1500/driver/source/nmuart.c"/>
-          <file category="source" name="third_party/atmel/winc1500/spi_flash/source/spi_flash.c"/>
-          <file category="source" name="third_party/atmel/winc1500/os/source/m2m_wifi_ex.c"/>
+          <file category="source" name="third_party/microchip/winc1500/common/source/nm_common.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/m2m_ate_mode.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/m2m_crypto.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/m2m_hif.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/m2m_ota.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/m2m_periph.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/m2m_wifi.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/nmasic.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/nmbus.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/nmdrv.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/nmi2c.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/nmspi.c"/>
+          <file category="source" name="third_party/microchip/winc1500/driver/source/nmuart.c"/>
+          <file category="source" name="third_party/microchip/winc1500/spi_flash/source/spi_flash.c"/>
+          <file category="source" name="third_party/microchip/winc1500/os/source/m2m_wifi_ex.c"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_sam4s.h" condition="SAM4S"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_sam4s.c" condition="SAM4S"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_sam4s.c" condition="SAM4S"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_sam4s.h" condition="SAM4S"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_sam4s.c" condition="SAM4S"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_sam4s.c" condition="SAM4S"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_samd21.h" condition="SAMD21"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_samd21.c" condition="SAMD21"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_samd21.c" condition="SAMD21"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_samd21.h" condition="SAMD21"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_samd21.c" condition="SAMD21"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_samd21.c" condition="SAMD21"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_same54.h" condition="SAME54"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_same54.c" condition="SAME54"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_same54.c" condition="SAME54"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_same54.h" condition="SAME54"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_same54.c" condition="SAME54"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_same54.c" condition="SAME54"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_samg55.h" condition="SAMG55"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_samg55.c" condition="SAMG55"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_samg55.c" condition="SAMG55"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_samg55.h" condition="SAMG55"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_samg55.c" condition="SAMG55"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_samg55.c" condition="SAMG55"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_stm32f2xx.h" condition="STM32F2"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_stm32f2xx.c" condition="STM32F2"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32f2xx.c" condition="STM32F2"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_stm32f2xx.h" condition="STM32F2"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_stm32f2xx.c" condition="STM32F2"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32f2xx.c" condition="STM32F2"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_stm32f4xx.h" condition="STM32F4"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_stm32f4xx.c" condition="STM32F4"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32f4xx.c" condition="STM32F4"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_stm32f4xx.h" condition="STM32F4"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_stm32f4xx.c" condition="STM32F4"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32f4xx.c" condition="STM32F4"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_stm32f7xx.h" condition="STM32F7"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_stm32f7xx.c" condition="STM32F7"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32f7xx.c" condition="STM32F7"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_stm32f7xx.h" condition="STM32F7"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_stm32f7xx.c" condition="STM32F7"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32f7xx.c" condition="STM32F7"/>
           
-          <file category="header" name="third_party/atmel/winc1500/bsp/include/nm_bsp_stm32l4xx.h" condition="STM32L4"/>
-          <file category="source" name="third_party/atmel/winc1500/bsp/source/nm_bsp_stm32l4xx.c" condition="STM32L4"/>
-          <file category="source" name="third_party/atmel/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32l4xx.c" condition="STM32L4"/>
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_stm32h7xx.h" condition="STM32H7"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_stm32h7xx.c" condition="STM32H7"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32h7xx.c" condition="STM32H7"/>
+          
+          <file category="header" name="third_party/microchip/winc1500/bsp/include/nm_bsp_stm32l4xx.h" condition="STM32L4"/>
+          <file category="source" name="third_party/microchip/winc1500/bsp/source/nm_bsp_stm32l4xx.c" condition="STM32L4"/>
+          <file category="source" name="third_party/microchip/winc1500/bus_wrapper/source/nm_bus_wrapper_stm32l4xx.c" condition="STM32L4"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Wi-Fi)" Csub="WINC3400" condition="CycloneTCP Core Dependencies">
+        <description>Microchip WINC3400 Wi-Fi controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/wifi/winc3400_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/wifi/winc3400_driver.c"/>
+          
+          <file category="include" name="third_party/microchip/winc3400/"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp.h"/>
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_internal.h"/>
+          <file category="header" name="third_party/microchip/winc3400/bus_wrapper/include/nm_bus_wrapper.h"/>
+          <file category="header" name="third_party/microchip/winc3400/common/include/nm_common.h"/>
+          <file category="header" name="third_party/microchip/winc3400/common/include/nm_debug.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/include/m2m_ate_mode.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/include/m2m_crypto.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/include/m2m_ota.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/include/m2m_periph.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/include/m2m_types.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/include/m2m_wifi.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/source/m2m_hif.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/source/nmasic.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/source/nmbus.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/source/nmi2c.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/source/nmdrv.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/source/nmspi.h"/>
+          <file category="header" name="third_party/microchip/winc3400/driver/source/nmuart.h"/>
+          <file category="header" name="third_party/microchip/winc3400/spi_flash/include/spi_flash.h"/>
+          <file category="header" name="third_party/microchip/winc3400/spi_flash/include/spi_flash_map.h"/>
+          <file category="header" name="third_party/microchip/winc3400/os/include/m2m_wifi_ex.h"/>
+          
+          <file category="source" name="third_party/microchip/winc3400/common/source/nm_common.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/m2m_ate_mode.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/m2m_crypto.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/m2m_hif.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/m2m_ota.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/m2m_periph.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/m2m_wifi.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/nmasic.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/nmbus.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/nmdrv.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/nmi2c.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/nmspi.c"/>
+          <file category="source" name="third_party/microchip/winc3400/driver/source/nmuart.c"/>
+          <file category="source" name="third_party/microchip/winc3400/spi_flash/source/spi_flash.c"/>
+          <file category="source" name="third_party/microchip/winc3400/os/source/m2m_wifi_ex.c"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_sam4s.h" condition="SAM4S"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_sam4s.c" condition="SAM4S"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_sam4s.c" condition="SAM4S"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_samd21.h" condition="SAMD21"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_samd21.c" condition="SAMD21"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_samd21.c" condition="SAMD21"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_same54.h" condition="SAME54"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_same54.c" condition="SAME54"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_same54.c" condition="SAME54"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_samg55.h" condition="SAMG55"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_samg55.c" condition="SAMG55"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_samg55.c" condition="SAMG55"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_stm32f2xx.h" condition="STM32F2"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_stm32f2xx.c" condition="STM32F2"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_stm32f2xx.c" condition="STM32F2"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_stm32f4xx.h" condition="STM32F4"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_stm32f4xx.c" condition="STM32F4"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_stm32f4xx.c" condition="STM32F4"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_stm32f7xx.h" condition="STM32F7"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_stm32f7xx.c" condition="STM32F7"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_stm32f7xx.c" condition="STM32F7"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_stm32h7xx.h" condition="STM32H7"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_stm32h7xx.c" condition="STM32H7"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_stm32h7xx.c" condition="STM32H7"/>
+          
+          <file category="header" name="third_party/microchip/winc3400/bsp/include/nm_bsp_stm32l4xx.h" condition="STM32L4"/>
+          <file category="source" name="third_party/microchip/winc3400/bsp/source/nm_bsp_stm32l4xx.c" condition="STM32L4"/>
+          <file category="source" name="third_party/microchip/winc3400/bus_wrapper/source/nm_bus_wrapper_stm32l4xx.c" condition="STM32L4"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Wi-Fi)" Csub="MRF24WG" condition="CycloneTCP Core Dependencies">
+        <description>Microchip MRF24WG0MA/B Wi-Fi controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/wifi/mrf24wg_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/wifi/mrf24wg_driver.c"/>
         </files>
       </component>
       
@@ -5280,27 +5461,18 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (Wi-Fi)" Csub="BCM43362" condition="CycloneTCP Core Dependencies">
-        <description>Broadcom BCM43362 Wi-Fi controller</description>
+      <component Cgroup="Drivers (Wi-Fi)" Csub="CC33xx" condition="CycloneTCP Core Dependencies">
+        <description>TI CC3300/CC3301 Wi-Fi controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/wifi/bcm43362_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/wifi/bcm43362_driver.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Drivers (Wi-Fi)" Csub="MRF24WG" condition="CycloneTCP Core Dependencies">
-        <description>Microchip MRF24WG0MA/B Wi-Fi controller</description>
-        <files>
-          <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/wifi/mrf24wg_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/wifi/mrf24wg_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/wifi/cc33xx_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/wifi/cc33xx_driver.c"/>
         </files>
       </component>
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.3.0">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.3.2">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -5749,19 +5921,19 @@
         </files>
       </component>
       
-      <component Cgroup="Cipher" Csub="SEED" condition="CycloneSSL SEED Dependencies">
-        <description>SEED Block Cipher</description>
+      <component Cgroup="Cipher" Csub="ARIA" condition="CycloneSSL ARIA Dependencies">
+        <description>ARIA Block Cipher</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_SSL_SEED
+          #define RTE_CYCLONE_SSL_ARIA
         </RTE_Components_h>
         <files>
         </files>
       </component>
       
-      <component Cgroup="Cipher" Csub="ARIA" condition="CycloneSSL ARIA Dependencies">
-        <description>ARIA Block Cipher</description>
+      <component Cgroup="Cipher" Csub="SEED" condition="CycloneSSL SEED Dependencies">
+        <description>SEED Block Cipher</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_SSL_ARIA
+          #define RTE_CYCLONE_SSL_SEED
         </RTE_Components_h>
         <files>
         </files>
@@ -6003,7 +6175,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.3.0">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.3.2">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -6580,7 +6752,7 @@
     </bundle>
     
     <!-- CycloneIPSEC -->
-    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.3.0">
+    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.3.2">
       <description>IPsec/IKEv2 Library</description>
       <doc></doc>
       
@@ -6904,6 +7076,15 @@
         </files>
       </component>
       
+      <component Cgroup="MAC" Csub="XCBC-MAC" condition="CycloneIPSEC XCBC-MAC Dependencies">
+        <description>XCBC-MAC Message Authentication Code</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_IPSEC_XCBC_MAC
+        </RTE_Components_h>
+        <files>
+        </files>
+      </component>
+      
       <component Cgroup="Cipher" Csub="IDEA" condition="CycloneIPSEC IDEA Dependencies">
         <description>IDEA Block Cipher (insecure)</description>
         <RTE_Components_h>
@@ -7086,7 +7267,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.3.0">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.3.2">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -7217,7 +7398,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.3.0">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.3.2">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -7299,7 +7480,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.3.0">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.3.2">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -7633,6 +7814,18 @@
         </files>
       </component>
       
+      <component Cgroup="Hash" Csub="SM3" condition="CycloneCRYPTO Core Dependencies">
+        <description>SM3 Hash Function</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_SM3
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/hash/sm3.h"/>
+          <file category="source" name="cyclone_crypto/hash/sm3.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Hash" Csub="Tiger" condition="CycloneCRYPTO Core Dependencies">
         <description>Tiger Hash Function</description>
         <RTE_Components_h>
@@ -7738,6 +7931,18 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/mac/kmac.h"/>
           <file category="source" name="cyclone_crypto/mac/kmac.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="MAC" Csub="XCBC-MAC" condition="CycloneCRYPTO Core Dependencies">
+        <description>XCBC-MAC Message Authentication Code</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_XCBC_MAC
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/mac/xcbc_mac.h"/>
+          <file category="source" name="cyclone_crypto/mac/xcbc_mac.c"/>
         </files>
       </component>
       
@@ -7945,6 +8150,18 @@
         </files>
       </component>
       
+      <component Cgroup="Cipher" Csub="ARIA" condition="CycloneCRYPTO Core Dependencies">
+        <description>ARIA Block Cipher</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_ARIA
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/cipher/aria.h"/>
+          <file category="source" name="cyclone_crypto/cipher/aria.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Cipher" Csub="SEED" condition="CycloneCRYPTO Core Dependencies">
         <description>SEED Block Cipher</description>
         <RTE_Components_h>
@@ -7957,15 +8174,15 @@
         </files>
       </component>
       
-      <component Cgroup="Cipher" Csub="ARIA" condition="CycloneCRYPTO Core Dependencies">
-        <description>ARIA Block Cipher</description>
+      <component Cgroup="Cipher" Csub="SM4" condition="CycloneCRYPTO Core Dependencies">
+        <description>SM4 Block Cipher</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_CRYPTO_ARIA
+          #define RTE_CYCLONE_CRYPTO_SM4
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_crypto/"/>
-          <file category="header" name="cyclone_crypto/cipher/aria.h"/>
-          <file category="source" name="cyclone_crypto/cipher/aria.c"/>
+          <file category="header" name="cyclone_crypto/cipher/sm4.h"/>
+          <file category="source" name="cyclone_crypto/cipher/sm4.c"/>
         </files>
       </component>
       
@@ -8816,6 +9033,19 @@
         </files>
       </component>
       
+      <component Cgroup="Hardware" Csub="PIC32CK" condition="CycloneCRYPTO Core Dependencies">
+        <description>Microchip PIC32CK Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/pic32ck/pic32ck_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/pic32ck/pic32ck_crypto_trng.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/pic32ck/pic32ck_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/pic32ck/pic32ck_crypto_trng.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Hardware" Csub="PIC32CM-JH" condition="CycloneCRYPTO Core Dependencies">
         <description>Microchip PIC32CM-JH Cryptographic Accelerator</description>
         <files>
@@ -9069,6 +9299,23 @@
         </files>
       </component>
       
+      <component Cgroup="Hardware" Csub="SAMS70" condition="CycloneCRYPTO Core Dependencies">
+        <description>Microchip SAMS70 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/sams70/sams70_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sams70/sams70_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sams70/sams70_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/sams70/sams70_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/sams70/sams70_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sams70/sams70_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sams70/sams70_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/sams70/sams70_crypto_cipher.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Hardware" Csub="SAMV71" condition="CycloneCRYPTO Core Dependencies">
         <description>Microchip SAMV71 Cryptographic Accelerator</description>
         <files>
@@ -9134,6 +9381,19 @@
           <file category="source" name="cyclone_crypto/hardware/sam9x60/sam9x60_crypto_trng.c"/>
           <file category="source" name="cyclone_crypto/hardware/sam9x60/sam9x60_crypto_hash.c"/>
           <file category="source" name="cyclone_crypto/hardware/sam9x60/sam9x60_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="M467" condition="CycloneCRYPTO Core Dependencies">
+        <description>Nuvoton M467 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/m467/m467_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/m467/m467_crypto_trng.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/m467/m467_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/m467/m467_crypto_trng.c"/>
         </files>
       </component>
       
