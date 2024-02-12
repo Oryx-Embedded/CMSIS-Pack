@@ -3,13 +3,22 @@
 <package schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="PACK.xsd">
   <vendor>Oryx-Embedded</vendor>
   <name>Middleware</name>
-  <description>Middleware Package (CycloneTCP, CycloneSSL, CycloneSSH, CycloneIPSEC, CycloneSTP, CycloneACME and CycloneCRYPTO)</description>
+  <description>Middleware Package (CycloneTCP, CycloneSSL, CycloneSSH, CycloneIPSEC, CycloneEAP, CycloneSTP, CycloneACME and CycloneCRYPTO)</description>
   <url>https://www.oryx-embedded.com/download/pack/</url>
   <supportContact>support@oryx-embedded.com</supportContact>
   <license>doc/license.txt</license>
   
   <!-- Releases section -->
   <releases>
+    <release version="2.4.0" date="2023-02-10">
+      - New 802.1X / EAP library library (CycloneEAP) implementing supplicant and authenticator roles
+      - Added Ethernet MAC driver for NXP NXC N947 (Cortex-M33 with 10/100 Ethernet MAC)
+      - Added Ethernet MAC driver for STM32MP13 (Cortex-A7 with dual Gigabit Ethernet MAC)
+      - Added driver for Microchip LAN8741 (10/100 Ethernet PHY)
+      - Added driver for NXP TJA1103 (100Base-T1 PHY)
+      - Added driver for Microchip LAN9370 (4-port 100Base-T1 Ethernet switch)
+      - Added support for STM32MP13 hardware cryptographic accelerator (TRNG, HASH, CRYP, and PKA peripherals)
+    </release>
     <release version="2.3.4" date="2023-12-18">
       - Added support for BSD socket options IP_DONTFRAG and IPV6_DONTFRAG
       - Fixed date formatting in Syslog client
@@ -44,7 +53,7 @@
       - Hardware-assisted AES-CCM implementation for Renesas RA4 and RA6 series
     </release>
     <release version="2.3.0" date="2023-06-12">
-      - New IPsec/IKEv2 library (CycloneIPSEC)
+      - New IPsec / IKEv2 library (CycloneIPSEC)
       - Added Syslog client implementation (as per RFC 3164)
       - Added new APIs to set default TTL value for IPv4 (ipv4SetDefaultTtl) and default Hop Limit value for IPv6 (ipv6SetDefaultHopLimit)
       - Added new API to configure TCP MSS value (socketSetMaxSegmentSize)
@@ -1708,6 +1717,39 @@
       <require Cclass="CycloneCRYPTO" Cgroup="ECC" Csub="Core"/>
     </condition>
     
+    <!-- CycloneEAP Dependencies -->
+    <condition id="CycloneEAP Dependencies">
+      <description>CycloneEAP Dependencies</description>
+      <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
+    </condition>
+    <condition id="CycloneEAP Supplicant Dependencies">
+      <description>CycloneEAP Supplicant Dependencies</description>
+      <require Cclass="CycloneEAP" Cgroup="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+    </condition>
+    <condition id="CycloneEAP Authenticator Dependencies">
+      <description>CycloneEAP Authenticator Dependencies</description>
+      <require Cclass="CycloneEAP" Cgroup="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="UDP"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Hash" Csub="MD5"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
+    </condition>
+    <condition id="CycloneEAP EAP-MD5 Dependencies">
+      <description>CycloneEAP EAP-MD5 Dependencies</description>
+      <require Cclass="CycloneEAP" Cgroup="Supplicant"/>
+    </condition>
+    <condition id="CycloneEAP EAP-TLS Dependencies">
+      <description>CycloneEAP EAP-TLS Dependencies</description>
+      <require Cclass="CycloneEAP" Cgroup="Supplicant"/>
+      <require Cclass="CycloneSSL" Cgroup="TLS Client"/>
+    </condition>
+    <condition id="CycloneEAP IEEE8021-PAE-MIB Dependencies">
+      <description>CycloneEAP IEEE8021-PAE-MIB Dependencies</description>
+      <require Cclass="CycloneEAP" Cgroup="Core"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="ASN.1"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="OID"/>
+    </condition>
+    
     <!-- CycloneCRYPTO Dependencies -->
     <condition id="CycloneCRYPTO Dependencies">
       <description>CycloneCRYPTO Dependencies</description>
@@ -1894,6 +1936,12 @@
       <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="Base64"/>
       <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="ASN.1"/>
     </condition>
+    <condition id="CycloneCRYPTO PEM Decryption Dependencies">
+      <description>CycloneCRYPTO PEM Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="Base64"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="ASN.1"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="KDF" Csub="PBKDF"/>
+    </condition>
     <condition id="CycloneCRYPTO OCSP Core Dependencies">
       <description>CycloneCRYPTO OCSP Core Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Parsing"/>
@@ -1982,6 +2030,10 @@
     <description Cclass="CycloneIPSEC" Cgroup="Hash">Hash Functions</description>
     <description Cclass="CycloneIPSEC" Cgroup="Elliptic Curves">Elliptic Curves</description>
     
+    <description Cclass="CycloneEAP">802.1X / EAP Library</description>
+    <description Cclass="CycloneEAP" Cgroup="Methods">Authentication Methods</description>
+    <description Cclass="CycloneEAP" Cgroup="MIBs">MIB Bases</description>
+    
     <description Cclass="CycloneSTP">Spanning Tree Protocol Library</description>
     <description Cclass="CycloneSTP" Cgroup="MIBs">MIB Bases</description>
     
@@ -2010,7 +2062,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.3.4">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.4.0">
       <description>Common Files</description>
       <doc></doc>
       
@@ -2033,7 +2085,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_none.h"/>
           <file category="source" name="common/os_port_none.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2044,7 +2096,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_chibios.h"/>
           <file category="source" name="common/os_port_chibios.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2055,7 +2107,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_cmsis_rtos.h"/>
           <file category="source" name="common/os_port_cmsis_rtos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2066,7 +2118,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_cmsis_rtos2.h"/>
           <file category="source" name="common/os_port_cmsis_rtos2.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2077,7 +2129,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_cmx_rtx.h"/>
           <file category="source" name="common/os_port_cmx_rtx.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2088,7 +2140,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_embos.h"/>
           <file category="source" name="common/os_port_embos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2099,7 +2151,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_freertos.h"/>
           <file category="source" name="common/os_port_freertos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2110,7 +2162,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_safertos.h"/>
           <file category="source" name="common/os_port_safertos.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2121,7 +2173,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_rtx.h"/>
           <file category="source" name="common/os_port_rtx.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2132,7 +2184,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_threadx.h"/>
           <file category="source" name="common/os_port_threadx.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2143,7 +2195,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_px5.h"/>
           <file category="source" name="common/os_port_px5.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2154,7 +2206,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_ucos3.h"/>
           <file category="source" name="common/os_port_ucos3.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2165,7 +2217,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_ucos3.h"/>
           <file category="source" name="common/os_port_ucos3.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2176,7 +2228,7 @@
           <file category="header" name="common/os_port.h"/>
           <file category="header" name="common/os_port_zephyr.h"/>
           <file category="source" name="common/os_port_zephyr.c"/>
-          <file category="header" name="config/os_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/os_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2187,7 +2239,7 @@
           <file category="header" name="common/fs_port.h"/>
           <file category="header" name="common/fs_port_fatfs.h"/>
           <file category="source" name="common/fs_port_fatfs.c"/>
-          <file category="header" name="config/fs_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/fs_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2198,7 +2250,7 @@
           <file category="header" name="common/fs_port.h"/>
           <file category="header" name="common/fs_port_rl_fs.h"/>
           <file category="source" name="common/fs_port_rl_fs.c"/>
-          <file category="header" name="config/fs_port_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/fs_port_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -2233,7 +2285,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.3.4">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.4.0">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -2262,7 +2314,7 @@
           <file category="source" name="cyclone_tcp/core/ethernet_misc.c"/>
           <file category="source" name="cyclone_tcp/core/ip.c"/>
           
-          <file category="header" name="config/net_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/net_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -4213,6 +4265,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="MCXN947" condition="CycloneTCP Core Dependencies">
+        <description>NXP MCX N947 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mcxn947_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mcxn947_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="i.MX RT1020" condition="CycloneTCP Core Dependencies">
         <description>NXP i.MX RT1020 Ethernet MAC controller</description>
         <files>
@@ -4428,6 +4489,19 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="STM32MP13xx" condition="CycloneTCP Core Dependencies">
+        <description>ST STM32MP13 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/drivers/mac/stm32mp13xx_eth1_driver.h"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/stm32mp13xx_eth2_driver.h"/>
+          
+          <file category="source" name="cyclone_tcp/drivers/mac/stm32mp13xx_eth1_driver.c"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/stm32mp13xx_eth2_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="STR912" condition="CycloneTCP Core Dependencies">
         <description>ST STR912 Ethernet MAC controller</description>
         <files>
@@ -4455,7 +4529,7 @@
         </files>
       </component>
       
-      <component Cgroup="Drivers (MAC)" Csub="Tiva TM4C129" condition="CycloneTCP Core Dependencies">
+      <component Cgroup="Drivers (MAC)" Csub="TM4C129" condition="CycloneTCP Core Dependencies">
         <description>TI Tiva TM4C129 Ethernet controller</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
@@ -4762,6 +4836,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (PHY)" Csub="LAN8741" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN8741 Ethernet PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/lan8741_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/lan8741_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (PHY)" Csub="LAN8742" condition="CycloneTCP Core Dependencies">
         <description>Microchip LAN8742 Ethernet PHY transceiver</description>
         <files>
@@ -4822,6 +4905,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/phy/tja1102_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/phy/tja1102_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (PHY)" Csub="TJA1103" condition="CycloneTCP Core Dependencies">
+        <description>NXP TJA1103 100Base-T1 PHY transceiver</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/tja1103_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/tja1103_driver.c"/>
         </files>
       </component>
       
@@ -5182,6 +5274,15 @@
           <file category="include" name="cyclone_tcp/"/>
           <file category="header" name="cyclone_tcp/drivers/switch/lan9355_driver.h"/>
           <file category="source" name="cyclone_tcp/drivers/switch/lan9355_driver.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Drivers (Switch)" Csub="LAN9370" condition="CycloneTCP Core Dependencies">
+        <description>Microchip LAN9370 100Base-T1 switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/lan9370_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/lan9370_driver.c"/>
         </files>
       </component>
       
@@ -5594,7 +5695,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.3.4">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.4.0">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -5654,7 +5755,7 @@
           <file category="source" name="cyclone_ssl/tls13_ticket.c"/>
           <file category="source" name="cyclone_ssl/tls13_misc.c"/>
           
-          <file category="header" name="config/tls_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/tls_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -6339,7 +6440,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.3.4">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.4.0">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -6418,7 +6519,7 @@
           <file category="source" name="cyclone_ssh/ssh/ssh_sign_misc.c"/>
           <file category="source" name="cyclone_ssh/ssh/ssh_misc.c"/>
           
-          <file category="header" name="config/ssh_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/ssh_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -6916,8 +7017,8 @@
     </bundle>
     
     <!-- CycloneIPSEC -->
-    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.3.4">
-      <description>IPsec/IKEv2 Library</description>
+    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.4.0">
+      <description>IPsec / IKEv2 Library</description>
       <doc></doc>
       
       <component Cgroup="IPsec" condition="CycloneIPSEC IPsec Dependencies">
@@ -6940,7 +7041,7 @@
           <file category="source" name="cyclone_ipsec/ipsec/ipsec_anti_replay.c"/>
           <file category="source" name="cyclone_ipsec/ipsec/ipsec_misc.c"/>
           
-          <file category="header" name="config/ipsec_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/ipsec_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -7430,8 +7531,139 @@
       </component>
     </bundle>
     
+    <!-- CycloneEAP -->
+    <bundle Cbundle="CycloneEAP" Cclass="CycloneEAP" Cversion="2.4.0">
+      <description>802.1X / EAP Library</description>
+      <doc></doc>
+      
+      <component Cgroup="Core" condition="CycloneEAP Dependencies">
+        <description>802.1X / EAP Library Core</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EAP
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_eap/"/>
+          <file category="header" name="cyclone_eap/eap/eap.h"/>
+          <file category="header" name="config/eap_config.h" attr="config" version="2.4.0"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Supplicant" condition="CycloneEAP Supplicant Dependencies">
+        <description>802.1X Supplicant</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EAP_SUPPLICANT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_eap/"/>
+          
+          <file category="header" name="cyclone_eap/supplicant/supplicant.h"/>
+          <file category="header" name="cyclone_eap/supplicant/supplicant_fsm.h"/>
+          <file category="header" name="cyclone_eap/supplicant/supplicant_pae_fsm.h"/>
+          <file category="header" name="cyclone_eap/supplicant/supplicant_backend_fsm.h"/>
+          <file category="header" name="cyclone_eap/supplicant/supplicant_procedures.h"/>
+          <file category="header" name="cyclone_eap/supplicant/supplicant_misc.h"/>
+          <file category="header" name="cyclone_eap/eap/eap_peer_fsm.h"/>
+          <file category="header" name="cyclone_eap/eap/eap_peer_procedures.h"/>
+          <file category="header" name="cyclone_eap/eap/eap_debug.h"/>
+          
+          <file category="source" name="cyclone_eap/supplicant/supplicant.c"/>
+          <file category="source" name="cyclone_eap/supplicant/supplicant_fsm.c"/>
+          <file category="source" name="cyclone_eap/supplicant/supplicant_pae_fsm.c"/>
+          <file category="source" name="cyclone_eap/supplicant/supplicant_backend_fsm.c"/>
+          <file category="source" name="cyclone_eap/supplicant/supplicant_procedures.c"/>
+          <file category="source" name="cyclone_eap/supplicant/supplicant_misc.c"/>
+          <file category="source" name="cyclone_eap/eap/eap_peer_fsm.c"/>
+          <file category="source" name="cyclone_eap/eap/eap_peer_procedures.c"/>
+          <file category="source" name="cyclone_eap/eap/eap_debug.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Authenticator" condition="CycloneEAP Authenticator Dependencies">
+        <description>802.1X Authenticator</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EAP_AUTHENTICATOR
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_eap/"/>
+          
+          <file category="header" name="cyclone_eap/authenticator/authenticator.h"/>
+          <file category="header" name="cyclone_eap/authenticator/authenticator_mgmt.h"/>
+          <file category="header" name="cyclone_eap/authenticator/authenticator_fsm.h"/>
+          <file category="header" name="cyclone_eap/authenticator/authenticator_pae_fsm.h"/>
+          <file category="header" name="cyclone_eap/authenticator/authenticator_backend_fsm.h"/>
+          <file category="header" name="cyclone_eap/authenticator/authenticator_reauth_timer_fsm.h"/>
+          <file category="header" name="cyclone_eap/authenticator/authenticator_procedures.h"/>
+          <file category="header" name="cyclone_eap/authenticator/authenticator_misc.h"/>
+          <file category="header" name="cyclone_eap/eap/eap_full_auth_fsm.h"/>
+          <file category="header" name="cyclone_eap/eap/eap_auth_procedures.h"/>
+          <file category="header" name="cyclone_eap/eap/eap_debug.h"/>
+          <file category="header" name="cyclone_eap/radius/radius.h"/>
+          <file category="header" name="cyclone_eap/radius/radius_attributes.h"/>
+          <file category="header" name="cyclone_eap/radius/radius_debug.h"/>
+          
+          <file category="source" name="cyclone_eap/authenticator/authenticator.c"/>
+          <file category="source" name="cyclone_eap/authenticator/authenticator_mgmt.c"/>
+          <file category="source" name="cyclone_eap/authenticator/authenticator_fsm.c"/>
+          <file category="source" name="cyclone_eap/authenticator/authenticator_pae_fsm.c"/>
+          <file category="source" name="cyclone_eap/authenticator/authenticator_backend_fsm.c"/>
+          <file category="source" name="cyclone_eap/authenticator/authenticator_reauth_timer_fsm.c"/>
+          <file category="source" name="cyclone_eap/authenticator/authenticator_procedures.c"/>
+          <file category="source" name="cyclone_eap/authenticator/authenticator_misc.c"/>
+          <file category="source" name="cyclone_eap/eap/eap_full_auth_fsm.c"/>
+          <file category="source" name="cyclone_eap/eap/eap_auth_procedures.c"/>
+          <file category="source" name="cyclone_eap/eap/eap_debug.c"/>
+          <file category="source" name="cyclone_eap/radius/radius_attributes.c"/>
+          <file category="source" name="cyclone_eap/radius/radius_debug.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Methods" Csub="EAP-MD5" condition="CycloneEAP EAP-MD5 Dependencies">
+        <description>MD5-Challenge Authentication Method</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EAP_MD5
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_eap/"/>
+          <file category="header" name="cyclone_eap/eap/eap_md5.h"/>
+          <file category="source" name="cyclone_eap/eap/eap_md5.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Methods" Csub="EAP-TLS" condition="CycloneEAP EAP-TLS Dependencies">
+        <description>EAP-TLS Authentication Method</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EAP_TLS
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_eap/"/>
+          <file category="header" name="cyclone_eap/eap/eap_tls.h"/>
+          <file category="source" name="cyclone_eap/eap/eap_tls.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="MIBs" Csub="IEEE8021-PAE-MIB" condition="CycloneEAP IEEE8021-PAE-MIB Dependencies">
+        <description>Standard IEEE8021-PAE-MIB Base</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EAP_IEEE8021_PAE_MIB
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_eap/"/>
+          
+          <file category="header" name="cyclone_eap/mibs/ieee8021_pae_mib_module.h"/>
+          <file category="header" name="cyclone_eap/mibs/ieee8021_pae_mib_impl.h"/>
+          <file category="header" name="cyclone_eap/mibs/ieee8021_pae_mib_impl_sys.h"/>
+          <file category="header" name="cyclone_eap/mibs/ieee8021_pae_mib_impl_auth.h"/>
+          
+          <file category="source" name="cyclone_eap/mibs/ieee8021_pae_mib_module.c"/>
+          <file category="source" name="cyclone_eap/mibs/ieee8021_pae_mib_impl.c"/>
+          <file category="source" name="cyclone_eap/mibs/ieee8021_pae_mib_impl_sys.c"/>
+          <file category="source" name="cyclone_eap/mibs/ieee8021_pae_mib_impl_auth.c"/>
+        </files>
+      </component>
+    </bundle>
+    
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.3.4">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.4.0">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -7443,7 +7675,7 @@
         <files>
           <file category="include" name="cyclone_stp/"/>
           <file category="header" name="cyclone_stp/stp/stp_common.h"/>
-          <file category="header" name="config/stp_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/stp_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -7562,7 +7794,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.3.4">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.4.0">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -7573,7 +7805,7 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_acme/"/>
-          <file category="header" name="config/acme_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/acme_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -7644,7 +7876,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.3.4">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.4.0">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -7664,7 +7896,7 @@
           <file category="header" name="cyclone_crypto/mac/mac_algorithms.h"/>
           <file category="header" name="cyclone_crypto/pkc/key_exch_algorithms.h"/>
           <file category="header" name="cyclone_crypto/pkc/sign_algorithms.h"/>
-          <file category="header" name="config/crypto_config.h" attr="config" version="2.3.0"/>
+          <file category="header" name="config/crypto_config.h" attr="config" version="2.4.0"/>
         </files>
       </component>
       
@@ -9081,8 +9313,6 @@
           <file category="header" name="cyclone_crypto/pkix/pem_import.h"/>
           <file category="header" name="cyclone_crypto/pkix/pem_decrypt.h"/>
           <file category="header" name="cyclone_crypto/pkix/pem_common.h"/>
-          <file category="header" name="cyclone_crypto/pkix/pkcs5_decrypt.h"/>
-          <file category="header" name="cyclone_crypto/pkix/pkcs5_common.h"/>
           <file category="header" name="cyclone_crypto/pkix/pkcs8_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_key_parse.h"/>
           <file category="header" name="cyclone_crypto/pkix/x509_common.h"/>
@@ -9090,8 +9320,6 @@
           <file category="source" name="cyclone_crypto/pkix/pem_import.c"/>
           <file category="source" name="cyclone_crypto/pkix/pem_decrypt.c"/>
           <file category="source" name="cyclone_crypto/pkix/pem_common.c"/>
-          <file category="source" name="cyclone_crypto/pkix/pkcs5_decrypt.c"/>
-          <file category="source" name="cyclone_crypto/pkix/pkcs5_common.c"/>
           <file category="source" name="cyclone_crypto/pkix/pkcs8_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_parse.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
@@ -9115,6 +9343,22 @@
           <file category="source" name="cyclone_crypto/pkix/pkcs8_key_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_key_format.c"/>
           <file category="source" name="cyclone_crypto/pkix/x509_common.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="PKIX" Csub="PEM File Decryption" condition="CycloneCRYPTO PEM Decryption Dependencies">
+        <description>PEM File Decryption</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_PEM_DECRYPT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/pkix/pkcs5_decrypt.h"/>
+          <file category="header" name="cyclone_crypto/pkix/pkcs5_common.h"/>
+          
+          <file category="source" name="cyclone_crypto/pkix/pkcs5_decrypt.c"/>
+          <file category="source" name="cyclone_crypto/pkix/pkcs5_common.c"/>
         </files>
       </component>
       
@@ -9668,22 +9912,22 @@
         </files>
       </component>
       
-      <component Cgroup="Hardware" Csub="LPC55xx" condition="CycloneCRYPTO Core Dependencies">
-        <description>NXP LPC55xx Cryptographic Accelerator</description>
+      <component Cgroup="Hardware" Csub="LPC55S6x" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP LPC55S6x Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
-          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto.h"/>
-          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_trng.h"/>
-          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_hash.h"/>
-          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_cipher.h"/>
-          <file category="header" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_pkc.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_pkc.h"/>
           
-          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto.c"/>
-          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_trng.c"/>
-          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_hash.c"/>
-          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_cipher.c"/>
-          <file category="source" name="cyclone_crypto/hardware/lpc55xx/lpc55xx_crypto_pkc.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/lpc55s6x/lpc55s6x_crypto_pkc.c"/>
         </files>
       </component>
       
@@ -10167,7 +10411,24 @@
         </files>
       </component>
       
-      <component Cgroup="Hardware" Csub="Tiva TM4C129" condition="CycloneCRYPTO Core Dependencies">
+      <component Cgroup="Hardware" Csub="STM32MP13xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32MP13 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32mp13xx/stm32mp13xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="TM4C129" condition="CycloneCRYPTO Core Dependencies">
         <description>TI Tiva TM4C129 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
@@ -10968,6 +11229,28 @@
         <keyword>SFTP</keyword>
         <keyword>SSH</keyword>
         <keyword>Client</keyword>
+      </attributes>
+    </example>
+    
+    <!-- EAP Supplicant Demo (Nucleo-F429ZI) -->
+    <example name="CycloneSSH EAP Supplicant Demo" doc="abstract.txt" folder="demo/nucleo_f429zi/eap_supplicant_demo">
+      <description>802.1X / EAP supplicant demo (CycloneTCP, CycloneEAP and CMSIS-RTOS)</description>
+      <board name="NUCLEO-F429ZI" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="eap_supplicant_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneEAP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>802.1X</keyword>
+        <keyword>EAP</keyword>
+        <keyword>Supplicant</keyword>
       </attributes>
     </example>
     
