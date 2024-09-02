@@ -10,6 +10,20 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.4.4" date="2024-09-02">
+      - Added NTS client (Network Time Security) as per RFC 8915
+      - Support for IGMPv3 host (RFC 3376) and MLDv2 node (RFC 3810)
+      - Added socket interface extensions for multicast source filters as per RFC 3678
+      - Added new BSD socket options for configuring IPv4 multicast source filters
+      - Added new BSD socket options for configuring protocol-independent multicast source filters
+      - Added support for SO_NO_CHECK option (BSD socket API)
+      - Added support for if_nametoindex() and if_indextoname() functions (BSD socket API)
+      - Reworked DNS-SD responder to support one instance name per service
+      - Added experimental support of post-quantum hybrid key exchange methods (CycloneSSL)
+      - Added new APIs to configure 802.1X supplicant's parameters (CycloneEAP)
+      - Support for AES-SIV-CMAC encryption (RFC 5297)
+      - Added support for ExtendedKeyUsage extension (X.509 certificate generation)
+    </release>
     <release version="2.4.2" date="2024-05-27">
       - Added Ethernet MAC driver for NXP MCX N547
       - Added Ethernet MAC driver for STM32H7Rx/Sx
@@ -624,6 +638,9 @@
       <description>CycloneACME ACME Client Dependencies</description>
       <require Cclass="CycloneACME" Cgroup="Core"/>
       <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client" Cvariant="TLS"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Encoding" Csub="Base64url"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="PEM File Export"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="CSR Creation"/>
     </condition>
     <condition id="CycloneACME ACME-DNS Client Dependencies">
       <description>CycloneACME ACME-DNS Client Dependencies</description>
@@ -697,8 +714,8 @@
       <description>CycloneTCP IGMP Snooping Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="IPv4" Csub="Core"/>
     </condition>
-    <condition id="CycloneTCP MLD Dependencies">
-      <description>CycloneTCP MLD Dependencies</description>
+    <condition id="CycloneTCP MLD Node Dependencies">
+      <description>CycloneTCP MLD Node Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="IPv6" Csub="Core"/>
     </condition>
     <condition id="CycloneTCP SLAAC Dependencies">
@@ -741,8 +758,8 @@
       <description>CycloneTCP mDNS Responder Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
     </condition>
-    <condition id="CycloneTCP DNS-SD Dependencies">
-      <description>CycloneTCP DNS-SD Dependencies</description>
+    <condition id="CycloneTCP DNS-SD Responder Dependencies">
+      <description>CycloneTCP DNS-SD Responder Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="mDNS" Csub="mDNS Responder"/>
     </condition>
     <condition id="CycloneTCP NBNS Client Dependencies">
@@ -971,6 +988,15 @@
       <description>CycloneTCP SNTP Client Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="UDP"/>
       <require Cclass="CycloneTCP" Cgroup="Socket"/>
+    </condition>
+    <condition id="CycloneTCP NTS Client Dependencies">
+      <description>CycloneTCP NTS Client Dependencies</description>
+      <require Cclass="CycloneTCP" Cgroup="TCP"/>
+      <require Cclass="CycloneTCP" Cgroup="UDP"/>
+      <require Cclass="CycloneTCP" Cgroup="Socket"/>
+      <require Cclass="CycloneSSL" Cgroup="TLS Client"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="AES"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="AEAD" Csub="SIV"/>
     </condition>
     <condition id="CycloneTCP TFTP Client Dependencies">
       <description>CycloneTCP TFTP Client Dependencies</description>
@@ -1857,6 +1883,11 @@
       <description>CycloneCRYPTO Triple DES Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="DES"/>
     </condition>
+    <condition id="CycloneCRYPTO SIV Dependencies">
+      <description>CycloneCRYPTO SIV Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Cipher Modes" Csub="CTR"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="CMAC"/>
+    </condition>
     <condition id="CycloneCRYPTO Chach20Poly1305 Dependencies">
       <description>CycloneCRYPTO Chach20Poly1305 Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="Cipher" Csub="ChaCha"/>
@@ -1991,6 +2022,7 @@
     <description Cclass="CycloneTCP" Cgroup="IPv4">IPv4 Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="IGMP">IGMP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="IPv6">IPv6 Protocol</description>
+    <description Cclass="CycloneTCP" Cgroup="MLD">MLD Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="DHCP">DHCP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="DHCPv6">DHCPv6 Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="DNS">DNS Protocol</description>
@@ -2008,6 +2040,7 @@
     <description Cclass="CycloneTCP" Cgroup="SNMP">SNMP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="MIBs">MIB Bases</description>
     <description Cclass="CycloneTCP" Cgroup="SNTP">SNTP Protocol</description>
+    <description Cclass="CycloneTCP" Cgroup="NTS">NTS Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="TFTP">TFTP Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="Icecast">Icecast Protocol</description>
     <description Cclass="CycloneTCP" Cgroup="Modbus">Modbus/TCP Protocol</description>
@@ -2087,7 +2120,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.4.2">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.4.4">
       <description>Common Files</description>
       <doc></doc>
       
@@ -2310,7 +2343,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.4.2">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.4.4">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -2339,7 +2372,7 @@
           <file category="source" name="cyclone_tcp/core/ethernet_misc.c"/>
           <file category="source" name="cyclone_tcp/core/ip.c"/>
           
-          <file category="header" name="config/net_config.h" attr="config" version="2.4.0"/>
+          <file category="header" name="config/net_config.h" attr="config" version="2.4.4"/>
         </files>
       </component>
       
@@ -2477,6 +2510,7 @@
           <file category="header" name="cyclone_tcp/ipv4/arp_cache.h"/>
           <file category="header" name="cyclone_tcp/ipv4/ipv4.h"/>
           <file category="header" name="cyclone_tcp/ipv4/ipv4_frag.h"/>
+          <file category="header" name="cyclone_tcp/ipv4/ipv4_multicast.h"/>
           <file category="header" name="cyclone_tcp/ipv4/ipv4_misc.h"/>
           <file category="header" name="cyclone_tcp/ipv4/ipv4_routing.h"/>
           <file category="header" name="cyclone_tcp/ipv4/icmp.h"/>
@@ -2485,6 +2519,7 @@
           <file category="source" name="cyclone_tcp/ipv4/arp_cache.c"/>
           <file category="source" name="cyclone_tcp/ipv4/ipv4.c"/>
           <file category="source" name="cyclone_tcp/ipv4/ipv4_frag.c"/>
+          <file category="source" name="cyclone_tcp/ipv4/ipv4_multicast.c"/>
           <file category="source" name="cyclone_tcp/ipv4/ipv4_misc.c"/>
           <file category="source" name="cyclone_tcp/ipv4/icmp.c"/>
         </files>
@@ -2517,10 +2552,12 @@
           <file category="header" name="cyclone_tcp/igmp/igmp_host.h"/>
           <file category="header" name="cyclone_tcp/igmp/igmp_host_misc.h"/>
           <file category="header" name="cyclone_tcp/igmp/igmp_common.h"/>
+          <file category="header" name="cyclone_tcp/igmp/igmp_debug.h"/>
           
           <file category="source" name="cyclone_tcp/igmp/igmp_host.c"/>
           <file category="source" name="cyclone_tcp/igmp/igmp_host_misc.c"/>
           <file category="source" name="cyclone_tcp/igmp/igmp_common.c"/>
+          <file category="source" name="cyclone_tcp/igmp/igmp_debug.c"/>
         </files>
       </component>
       
@@ -2570,9 +2607,10 @@
           
           <file category="header" name="cyclone_tcp/ipv6/ipv6.h"/>
           <file category="header" name="cyclone_tcp/ipv6/ipv6_frag.h"/>
-          <file category="header" name="cyclone_tcp/ipv6/ipv6_misc.h"/>
+          <file category="header" name="cyclone_tcp/ipv6/ipv6_multicast.h"/>
           <file category="header" name="cyclone_tcp/ipv6/ipv6_pmtu.h"/>
           <file category="header" name="cyclone_tcp/ipv6/ipv6_routing.h"/>
+          <file category="header" name="cyclone_tcp/ipv6/ipv6_misc.h"/>
           <file category="header" name="cyclone_tcp/ipv6/icmpv6.h"/>
           <file category="header" name="cyclone_tcp/ipv6/ndp.h"/>
           <file category="header" name="cyclone_tcp/ipv6/ndp_cache.h"/>
@@ -2580,9 +2618,10 @@
           
           <file category="source" name="cyclone_tcp/ipv6/ipv6.c"/>
           <file category="source" name="cyclone_tcp/ipv6/ipv6_frag.c"/>
-          <file category="source" name="cyclone_tcp/ipv6/ipv6_misc.c"/>
+          <file category="source" name="cyclone_tcp/ipv6/ipv6_multicast.c"/>
           <file category="source" name="cyclone_tcp/ipv6/ipv6_pmtu.c"/>
           <file category="source" name="cyclone_tcp/ipv6/ipv6_routing.c"/>
+          <file category="source" name="cyclone_tcp/ipv6/ipv6_misc.c"/>
           <file category="source" name="cyclone_tcp/ipv6/icmpv6.c"/>
           <file category="source" name="cyclone_tcp/ipv6/ndp.c"/>
           <file category="source" name="cyclone_tcp/ipv6/ndp_cache.c"/>
@@ -2590,15 +2629,23 @@
         </files>
       </component>
       
-      <component Cgroup="IPv6" Csub="MLD" condition="CycloneTCP MLD Dependencies">
-        <description>Multicast Listener Discovery</description>
+      <component Cgroup="MLD" Csub="MLD Node" condition="CycloneTCP MLD Node Dependencies">
+        <description>MLD Node</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_TCP_MLD
+          #define RTE_CYCLONE_TCP_MLD_NODE
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/ipv6/mld.h"/>
-          <file category="source" name="cyclone_tcp/ipv6/mld.c"/>
+          
+          <file category="header" name="cyclone_tcp/mld/mld_node.h"/>
+          <file category="header" name="cyclone_tcp/mld/mld_node_misc.h"/>
+          <file category="header" name="cyclone_tcp/mld/mld_common.h"/>
+          <file category="header" name="cyclone_tcp/mld/mld_debug.h"/>
+          
+          <file category="source" name="cyclone_tcp/mld/mld_node.c"/>
+          <file category="source" name="cyclone_tcp/mld/mld_node_misc.c"/>
+          <file category="source" name="cyclone_tcp/mld/mld_common.c"/>
+          <file category="source" name="cyclone_tcp/mld/mld_debug.c"/>
         </files>
       </component>
       
@@ -2779,19 +2826,19 @@
         </files>
       </component>
       
-      <component Cgroup="DNS-SD" Csub="DNS-SD" condition="CycloneTCP DNS-SD Dependencies">
-        <description>DNS-SD</description>
+      <component Cgroup="DNS-SD" Csub="DNS-SD Responder" condition="CycloneTCP DNS-SD Responder Dependencies">
+        <description>DNS-SD Responder</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_TCP_DNS_SD
+          #define RTE_CYCLONE_TCP_DNS_SD_RESPONDER
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_tcp/"/>
           
-          <file category="header" name="cyclone_tcp/dns_sd/dns_sd.h"/>
-          <file category="header" name="cyclone_tcp/dns_sd/dns_sd_misc.h"/>
+          <file category="header" name="cyclone_tcp/dns_sd/dns_sd_responder.h"/>
+          <file category="header" name="cyclone_tcp/dns_sd/dns_sd_responder_misc.h"/>
           
-          <file category="source" name="cyclone_tcp/dns_sd/dns_sd.c"/>
-          <file category="source" name="cyclone_tcp/dns_sd/dns_sd_misc.c"/>
+          <file category="source" name="cyclone_tcp/dns_sd/dns_sd_responder.c"/>
+          <file category="source" name="cyclone_tcp/dns_sd/dns_sd_responder_misc.c"/>
         </files>
       </component>
       
@@ -3625,10 +3672,36 @@
           
           <file category="header" name="cyclone_tcp/sntp/sntp_client.h"/>
           <file category="header" name="cyclone_tcp/sntp/sntp_client_misc.h"/>
-          <file category="header" name="cyclone_tcp/sntp/ntp_common.h"/>
+          <file category="header" name="cyclone_tcp/ntp/ntp_common.h"/>
+          <file category="header" name="cyclone_tcp/ntp/ntp_debug.h"/>
           
           <file category="source" name="cyclone_tcp/sntp/sntp_client.c"/>
           <file category="source" name="cyclone_tcp/sntp/sntp_client_misc.c"/>
+          <file category="source" name="cyclone_tcp/ntp/ntp_common.c"/>
+          <file category="source" name="cyclone_tcp/ntp/ntp_debug.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="NTS" Csub="NTS Client" condition="CycloneTCP NTS Client Dependencies">
+        <description>NTS Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_TCP_NTS_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          
+          <file category="header" name="cyclone_tcp/nts/nts_client.h"/>
+          <file category="header" name="cyclone_tcp/nts/nts_client_misc.h"/>
+          <file category="header" name="cyclone_tcp/nts/nts_common.h"/>
+          <file category="header" name="cyclone_tcp/nts/nts_debug.h"/>
+          <file category="header" name="cyclone_tcp/ntp/ntp_common.h"/>
+          <file category="header" name="cyclone_tcp/ntp/ntp_debug.h"/>
+          
+          <file category="source" name="cyclone_tcp/nts/nts_client.c"/>
+          <file category="source" name="cyclone_tcp/nts/nts_client_misc.c"/>
+          <file category="source" name="cyclone_tcp/nts/nts_debug.c"/>
+          <file category="source" name="cyclone_tcp/ntp/ntp_common.c"/>
+          <file category="source" name="cyclone_tcp/ntp/ntp_debug.c"/>
         </files>
       </component>
       
@@ -5814,7 +5887,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.4.2">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.4.4">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -6559,7 +6632,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.4.2">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.4.4">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -7136,7 +7209,7 @@
     </bundle>
     
     <!-- CycloneIPSEC -->
-    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.4.2">
+    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.4.4">
       <description>IPsec / IKEv2 Library</description>
       <doc></doc>
       
@@ -7651,7 +7724,7 @@
     </bundle>
     
     <!-- CycloneEAP -->
-    <bundle Cbundle="CycloneEAP" Cclass="CycloneEAP" Cversion="2.4.2">
+    <bundle Cbundle="CycloneEAP" Cclass="CycloneEAP" Cversion="2.4.4">
       <description>802.1X / EAP Library</description>
       <doc></doc>
       
@@ -7782,7 +7855,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.4.2">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.4.4">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -7913,7 +7986,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.4.2">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.4.4">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -7995,7 +8068,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.4.2">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.4.4">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -8856,6 +8929,18 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/aead/gcm.h"/>
           <file category="source" name="cyclone_crypto/aead/gcm.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="AEAD" Csub="SIV" condition="CycloneCRYPTO SIV Dependencies">
+        <description>SIV Cipher Mode</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_SIV
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/aead/siv.h"/>
+          <file category="source" name="cyclone_crypto/aead/siv.c"/>
         </files>
       </component>
       
@@ -11957,6 +12042,30 @@
       </attributes>
     </example>
     
+    <!-- ACME Client Demo (Nucleo-H743ZI) -->
+    <example name="CycloneACME ACME Client Demo" doc="abstract.txt" folder="demo/nucleo_h743zi/acme_client_demo">
+      <description>ACME client demo (CycloneTCP and CMSIS-RTOS2)</description>
+      <board name="NUCLEO-H743ZI" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="acme_client_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <component Cclass="CycloneACME"/>
+        <category>Middleware</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>ACME</keyword>
+        <keyword>Client</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>TLS</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
     <!-- FTP Client Demo (Nucleo-H743ZI) -->
     <example name="CycloneTCP FTP Client Demo" doc="abstract.txt" folder="demo/nucleo_h743zi/ftp_client_demo">
       <description>FTP client demo (CycloneTCP and CMSIS-RTOS2)</description>
@@ -12056,6 +12165,29 @@
         <keyword>TCP/IP stack</keyword>
         <keyword>TCP</keyword>
         <keyword>HTTP</keyword>
+        <keyword>Server</keyword>
+      </attributes>
+    </example>
+    
+    <!-- HTTPS Server Demo (Nucleo-H743ZI) -->
+    <example name="CycloneTCP HTTPS Server Demo" doc="abstract.txt" folder="demo/nucleo_h743zi/https_server_demo">
+      <description>HTTPS server demo (CycloneTCP, CycloneSSL and CMSIS-RTOS2)</description>
+      <board name="NUCLEO-H743ZIL" vendor="STMicroelectronics"/>
+      <project>
+        <environment name="uv" load="https_server_demo.uvprojx"/>
+      </project>
+      <attributes>
+        <component Cclass="CMSIS" Cgroup="CORE"/>
+        <component Cclass="CMSIS" Cgroup="RTOS"/>
+        <component Cclass="CycloneTCP"/>
+        <component Cclass="CycloneSSL"/>
+        <category>Middleware</category>
+        <category>Security</category>
+        <keyword>TCP/IP stack</keyword>
+        <keyword>TCP</keyword>
+        <keyword>HTTP</keyword>
+        <keyword>HTTPS</keyword>
+        <keyword>TLS</keyword>
         <keyword>Server</keyword>
       </attributes>
     </example>
