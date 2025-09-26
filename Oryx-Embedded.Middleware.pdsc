@@ -3,24 +3,39 @@
 <package schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="PACK.xsd">
   <vendor>Oryx-Embedded</vendor>
   <name>Middleware</name>
-  <description>Middleware Package (CycloneTCP, CycloneSSL, CycloneSSH, CycloneIPSEC, CycloneEAP, CycloneSTP, CycloneACME and CycloneCRYPTO)</description>
+  <description>Middleware Package (CycloneTCP, CycloneSSL, CycloneSSH, CycloneIPSEC, CycloneEAP, CycloneSTP, CycloneACME, CycloneEST, CycloneSCEP and CycloneCRYPTO)</description>
   <url>https://www.oryx-embedded.com/download/pack/</url>
   <supportContact>support@oryx-embedded.com</supportContact>
   <license>doc/license.txt</license>
   
   <!-- Releases section -->
   <releases>
+    <release version="2.5.4" date="2025-09-26">
+      - EST client implementation as per RFC 7030 (Enrollment over Secure Transport)
+      - SCEP client implementation as per RFC 8894 (Simple Certificate Enrolment Protocol)
+      - Added support for NBSTAT resource record (NetBIOS Name System responder)
+      - Added driver for NXP MCX E247 Ethernet MAC
+      - Added driver for Microchip KSZ9567 (7-port Gigabit Ethernet switch)
+      - Added support for QUIC transport layer (CycloneSSL)
+      - Added support for "trusted_ca_keys" TLS extension
+      - Added support for TLS binding channel (RFC 5929)
+      - Added support for Hash_DRBG, CTR-DRBG and XDRBG pseudorandom number generators
+      - Added support for deterministic ECDSA signature generation as per RFC 6979
+      - Added support for NXP MCX E247 hardware cryptographic accelerator (ELA_CSEC module)
+      - Added hardware-assisted cryptography for NXP MCX N series (EdgeLock accelerator)
+      - Added hardware-assisted cryptography for NXP i.MX RT1180 (ELE module)
+      - Added support for STM32U0 hardware cryptographic accelerator (TRNG and AES peripherals)
+    </release>
     <release version="2.5.2" date="2025-06-06">
       - Added ftpServerSetRootDir() API to the FTP server. This allows to configure a specific root directory per user
       - Added driver for Onsemi NCV7410 (10Base-T1S MAC+PHY controller with SPI interface)
-      - Added support for Microchip MaxLinear GPY111 Gigabit Ethernet PHYs
+      - Added support for MaxLinear GPY111 Gigabit Ethernet PHY
       - Added driver for Microchip LAN9646 (6-port Gigabit Ethernet switch)
       - Added experimental support of post-quantum hybrid SM2-MLKEM (CycloneSSL)
       - Added support for "aes128-gcm", "aes256-gcm", "chacha20-poly1305" authenticated encryption ciphers (CycloneSSH)
       - Fixed issue in sshDecodeSsh2PublicKeyFile() where an SSH2 public key with header section present was not properly parsed
       - Added support for HMAC_DRBG pseudorandom number generator
       - Added support for PKCS #7 (CMS)
-      - SCEP client implementation as per RFC 8894 (Simple Certificate Enrolment Protocol)
       - Added the ability to select the output format when exporting an RSA public or private key (PKCS #1 or PKCS #8 format)
       - Reworked PEM export API to calculate the length of the PEM string without copying any data when the "output" parameter is NULL
       - Added support for STM32U3 hardware cryptographic accelerator (TRNG, HASH, AES, and PKA peripherals)
@@ -691,6 +706,37 @@
       <description>CycloneACME ACME-DNS Client Dependencies</description>
       <require Cclass="CycloneACME" Cgroup="Core"/>
       <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client" Cvariant="TLS"/>
+    </condition>
+    
+    <!-- CycloneEST Dependencies -->
+    <condition id="CycloneEST Dependencies">
+      <description>CycloneEST Dependencies</description>
+      <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
+    </condition>
+    <condition id="CycloneEST EST Client Dependencies">
+      <description>CycloneEST EST Client Dependencies</description>
+      <require Cclass="CycloneEST" Cgroup="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKCS7" Csub="PKCS7 Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKCS7" Csub="PKCS7 Formatting"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="CSR Creation"/>
+    </condition>
+    
+    <!-- CycloneSCEP Dependencies -->
+    <condition id="CycloneSCEP Dependencies">
+      <description>CycloneSCEP Dependencies</description>
+      <require Cclass="CycloneCommon" Cgroup="Compiler Support"/>
+    </condition>
+    <condition id="CycloneSCEP SCEP Client Dependencies">
+      <description>CycloneSCEP SCEP Client Dependencies</description>
+      <require Cclass="CycloneSCEP" Cgroup="Core"/>
+      <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKCS7" Csub="PKCS7 Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKCS7" Csub="PKCS7 Formatting"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="CSR Parsing"/>
+      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="CSR Creation"/>
     </condition>
     
     <!-- CycloneSTP Dependencies -->
@@ -2017,9 +2063,21 @@
       <description>CycloneCRYPTO SHA-crypt Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="Core"/>
     </condition>
+    <condition id="CycloneCRYPTO Hash_DRBG Dependencies">
+      <description>CycloneCRYPTO Hash_DRBG Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Core"/>
+    </condition>
     <condition id="CycloneCRYPTO HMAC_DRBG Dependencies">
       <description>CycloneCRYPTO HMAC_DRBG Dependencies</description>
       <require Cclass="CycloneCRYPTO" Cgroup="MAC" Csub="HMAC"/>
+    </condition>
+    <condition id="CycloneCRYPTO CTR_DRBG Dependencies">
+      <description>CycloneCRYPTO CTR_DRBG Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Core"/>
+    </condition>
+    <condition id="CycloneCRYPTO XDRBG Dependencies">
+      <description>CycloneCRYPTO XDRBG Dependencies</description>
+      <require Cclass="CycloneCRYPTO" Cgroup="Core"/>
     </condition>
     <condition id="CycloneCRYPTO Yarrow Dependencies">
       <description>CycloneCRYPTO Yarrow Dependencies</description>
@@ -2059,15 +2117,6 @@
       <description>CycloneCRYPTO OCSP Client Dependencies</description>
       <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client"/>
       <require Cclass="CycloneCRYPTO" Cgroup="OCSP" Csub="Core"/>
-    </condition>
-    <condition id="CycloneCRYPTO SCEP Client Dependencies">
-      <description>CycloneCRYPTO SCEP Client Dependencies</description>
-      <require Cclass="CycloneTCP" Cgroup="HTTP" Csub="HTTP Client"/>
-      <require Cclass="CycloneCRYPTO" Cgroup="PKCS7" Csub="PKCS7 Parsing"/>
-      <require Cclass="CycloneCRYPTO" Cgroup="PKCS7" Csub="PKCS7 Formatting"/>
-      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="Certificate Parsing"/>
-      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="CSR Parsing"/>
-      <require Cclass="CycloneCRYPTO" Cgroup="PKIX" Csub="CSR Creation"/>
     </condition>
   </conditions>
   
@@ -2158,6 +2207,10 @@
     <description Cclass="CycloneACME">ACME Client Library</description>
     <description Cclass="CycloneACME" Cgroup="DNS API">DNS API</description>
     
+    <description Cclass="CycloneEST">EST Client Library</description>
+    
+    <description Cclass="CycloneSCEP">SCEP Client Library</description>
+    
     <description Cclass="CycloneCRYPTO">Cryptographic Library</description>
     <description Cclass="CycloneCRYPTO" Cgroup="Hash">Hash Functions</description>
     <description Cclass="CycloneCRYPTO" Cgroup="XOF">Extendable-Output Functions</description>
@@ -2174,7 +2227,6 @@
     <description Cclass="CycloneCRYPTO" Cgroup="PKCS7">PKCS #7 (CMS)</description>
     <description Cclass="CycloneCRYPTO" Cgroup="PKIX">Public-Key Infrastructure (X.509)</description>
     <description Cclass="CycloneCRYPTO" Cgroup="OCSP">OCSP Protocol</description>
-    <description Cclass="CycloneCRYPTO" Cgroup="SCEP">SCEP Protocol</description>
     <description Cclass="CycloneCRYPTO" Cgroup="Hardware">Hardware Cryptographic Accelerators</description>
   </taxonomy>
   
@@ -2182,7 +2234,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.5.2">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.5.4">
       <description>Common Files</description>
       <doc></doc>
       
@@ -2405,7 +2457,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.5.2">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.5.4">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -4463,6 +4515,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="MCXE247" condition="CycloneTCP Core Dependencies">
+        <description>NXP MCX E247 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/mcxe247_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/mcxe247_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="MCXN547" condition="CycloneTCP Core Dependencies">
         <description>NXP MCX N547 Ethernet MAC controller</description>
         <files>
@@ -4934,8 +4995,8 @@
         <description>MaxLinear GPY111 Gigabit Ethernet PHY transceiver</description>
         <files>
           <file category="include" name="cyclone_tcp/"/>
-          <file category="header" name="cyclone_tcp/drivers/phy/pef7071_driver.h"/>
-          <file category="source" name="cyclone_tcp/drivers/phy/pef7071_driver.c"/>
+          <file category="header" name="cyclone_tcp/drivers/phy/gpy111_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/phy/gpy111_driver.c"/>
         </files>
       </component>
       
@@ -5497,6 +5558,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (Switch)" Csub="KSZ9567" condition="CycloneTCP Core Dependencies">
+        <description>Microchip KSZ9567 Gigabit Ethernet switch</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/switch/ksz9567_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/switch/ksz9567_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (Switch)" Csub="KSZ9893" condition="CycloneTCP Core Dependencies">
         <description>Microchip KSZ9893 Gigabit Ethernet switch</description>
         <files>
@@ -6023,7 +6093,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.5.2">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.5.4">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -6051,6 +6121,8 @@
           <file category="header" name="cyclone_ssl/tls_record.h"/>
           <file category="header" name="cyclone_ssl/tls_record_encryption.h"/>
           <file category="header" name="cyclone_ssl/tls_record_decryption.h"/>
+          <file category="header" name="cyclone_ssl/tls_quic.h"/>
+          <file category="header" name="cyclone_ssl/tls_quic_misc.h"/>
           <file category="header" name="cyclone_ssl/tls_misc.h"/>
           <file category="header" name="cyclone_ssl/tls13_common.h"/>
           <file category="header" name="cyclone_ssl/tls13_sign_generate.h"/>
@@ -6075,6 +6147,8 @@
           <file category="source" name="cyclone_ssl/tls_record.c"/>
           <file category="source" name="cyclone_ssl/tls_record_encryption.c"/>
           <file category="source" name="cyclone_ssl/tls_record_decryption.c"/>
+          <file category="source" name="cyclone_ssl/tls_quic.c"/>
+          <file category="source" name="cyclone_ssl/tls_quic_misc.c"/>
           <file category="source" name="cyclone_ssl/tls_misc.c"/>
           <file category="source" name="cyclone_ssl/tls13_common.c"/>
           <file category="source" name="cyclone_ssl/tls13_sign_generate.c"/>
@@ -6768,7 +6842,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.5.2">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.5.4">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -7345,7 +7419,7 @@
     </bundle>
     
     <!-- CycloneIPSEC -->
-    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.5.2">
+    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.5.4">
       <description>IPsec / IKEv2 Library</description>
       <doc></doc>
       
@@ -7860,7 +7934,7 @@
     </bundle>
     
     <!-- CycloneEAP -->
-    <bundle Cbundle="CycloneEAP" Cclass="CycloneEAP" Cversion="2.5.2">
+    <bundle Cbundle="CycloneEAP" Cclass="CycloneEAP" Cversion="2.5.4">
       <description>802.1X / EAP Library</description>
       <doc></doc>
       
@@ -7991,7 +8065,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.5.2">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.5.4">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -8122,14 +8196,14 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.5.2">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.5.4">
       <description>ACME Client Library</description>
       <doc></doc>
       
       <component Cgroup="Core" condition="CycloneACME Dependencies">
         <description>ACME Library Core</description>
         <RTE_Components_h>
-          #define RTE_CYCLONE_CRYPTO
+          #define RTE_CYCLONE_ACME
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_acme/"/>
@@ -8202,9 +8276,95 @@
         </files>
       </component>
     </bundle>
+   
+   <!-- CycloneEST -->
+    <bundle Cbundle="CycloneEST" Cclass="CycloneEST" Cversion="2.5.4">
+      <description>EST Client Library</description>
+      <doc></doc>
+      
+      <component Cgroup="Core" condition="CycloneEST Dependencies">
+        <description>EST Library Core</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EST
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_est/"/>
+          <file category="header" name="config/est_config.h" attr="config" version="2.5.4"/>
+        </files>
+      </component>
+      
+      <component Cgroup="EST Client" condition="CycloneEST EST Client Dependencies">
+        <description>EST Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_EST_EST_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_est/"/>
+          
+          <file category="header" name="cyclone_est/est/est_client.h"/>
+          <file category="header" name="cyclone_est/est/est_client_operations.h"/>
+          <file category="header" name="cyclone_est/est/est_client_req_format.h"/>
+          <file category="header" name="cyclone_est/est/est_client_resp_parse.h"/>
+          <file category="header" name="cyclone_est/est/est_client_transport.h"/>
+          <file category="header" name="cyclone_est/est/est_client_misc.h"/>
+          
+          <file category="source" name="cyclone_est/est/est_client.c"/>
+          <file category="source" name="cyclone_est/est/est_client_operations.c"/>
+          <file category="source" name="cyclone_est/est/est_client_req_format.c"/>
+          <file category="source" name="cyclone_est/est/est_client_resp_parse.c"/>
+          <file category="source" name="cyclone_est/est/est_client_transport.c"/>
+          <file category="source" name="cyclone_est/est/est_client_misc.c"/>
+        </files>
+      </component>
+    </bundle>
+   
+   <!-- CycloneSCEP -->
+    <bundle Cbundle="CycloneSCEP" Cclass="CycloneSCEP" Cversion="2.5.4">
+      <description>SCEP Client Library</description>
+      <doc></doc>
+      
+      <component Cgroup="Core" condition="CycloneSCEP Dependencies">
+        <description>SCEP Library Core</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SCEP
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_scep/"/>
+          <file category="header" name="config/scep_config.h" attr="config" version="2.5.4"/>
+        </files>
+      </component>
+      
+      <component Cgroup="SCEP Client" condition="CycloneSCEP SCEP Client Dependencies">
+        <description>SCEP Client</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_SCEP_SCEP_CLIENT
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_scep/"/>
+          
+          <file category="header" name="cyclone_scep/scep/scep_client.h"/>
+          <file category="header" name="cyclone_scep/scep/scep_client_operations.h"/>
+          <file category="header" name="cyclone_scep/scep/scep_client_req_format.h"/>
+          <file category="header" name="cyclone_scep/scep/scep_client_resp_parse.h"/>
+          <file category="header" name="cyclone_scep/scep/scep_client_transport.h"/>
+          <file category="header" name="cyclone_scep/scep/scep_client_misc.h"/>
+          <file category="header" name="cyclone_scep/scep/scep_common.h"/>
+          <file category="header" name="cyclone_scep/scep/scep_debug.h"/>
+          
+          <file category="source" name="cyclone_scep/scep/scep_client.c"/>
+          <file category="source" name="cyclone_scep/scep/scep_client_operations.c"/>
+          <file category="source" name="cyclone_scep/scep/scep_client_req_format.c"/>
+          <file category="source" name="cyclone_scep/scep/scep_client_resp_parse.c"/>
+          <file category="source" name="cyclone_scep/scep/scep_client_transport.c"/>
+          <file category="source" name="cyclone_scep/scep/scep_client_misc.c"/>
+          <file category="source" name="cyclone_scep/scep/scep_common.c"/>
+          <file category="source" name="cyclone_scep/scep/scep_debug.c"/>
+        </files>
+      </component>
+    </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.5.2">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.5.4">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -9409,11 +9569,28 @@
         </RTE_Components_h>
         <files>
           <file category="include" name="cyclone_crypto/"/>
+          
           <file category="header" name="cyclone_crypto/mpi/mpi.h"/>
+          <file category="header" name="cyclone_crypto/mpi/mpi_misc.h"/>
+          
           <file category="source" name="cyclone_crypto/mpi/mpi.c"/>
+          <file category="source" name="cyclone_crypto/mpi/mpi_misc.c"/>
+          
           <file category="sourceAsm" name="cyclone_crypto/mpi/mpi_arm_v7m_keil.s" condition="Cortex-M ARMCC"/>
           <file category="sourceAsm" name="cyclone_crypto/mpi/mpi_arm_v7m_iar.s" condition="Cortex-M IAR"/>
           <file category="sourceAsm" name="cyclone_crypto/mpi/mpi_arm_v7m_gcc.S" condition="Cortex-M GCC"/>
+        </files>
+      </component>
+      
+      <component Cgroup="RNG" Csub="Hash_DRBG" condition="CycloneCRYPTO Hash_DRBG Dependencies">
+        <description>Hash_DRBG Pseudorandom Number Generator</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_HASH_DRBG
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/rng/hash_drbg.h"/>
+          <file category="source" name="cyclone_crypto/rng/hash_drbg.c"/>
         </files>
       </component>
       
@@ -9426,6 +9603,30 @@
           <file category="include" name="cyclone_crypto/"/>
           <file category="header" name="cyclone_crypto/rng/hmac_drbg.h"/>
           <file category="source" name="cyclone_crypto/rng/hmac_drbg.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="RNG" Csub="CTR_DRBG" condition="CycloneCRYPTO CTR_DRBG Dependencies">
+        <description>CTR_DRBG Pseudorandom Number Generator</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_CTR_DRBG
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/rng/ctr_drbg.h"/>
+          <file category="source" name="cyclone_crypto/rng/ctr_drbg.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="RNG" Csub="XDRBG" condition="CycloneCRYPTO XDRBG Dependencies">
+        <description>XDRBG Pseudorandom Number Generator</description>
+        <RTE_Components_h>
+          #define RTE_CYCLONE_CRYPTO_XDRBG
+        </RTE_Components_h>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          <file category="header" name="cyclone_crypto/rng/xdrbg.h"/>
+          <file category="source" name="cyclone_crypto/rng/xdrbg.c"/>
         </files>
       </component>
       
@@ -9895,34 +10096,6 @@
           
           <file category="source" name="cyclone_crypto/ocsp/ocsp_client.c"/>
           <file category="source" name="cyclone_crypto/ocsp/ocsp_client_misc.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="SCEP" Csub="SCEP Client" condition="CycloneCRYPTO SCEP Client Dependencies">
-        <description>SCEP Client</description>
-        <RTE_Components_h>
-          #define RTE_CYCLONE_CRYPTO_SCEP_CLIENT
-        </RTE_Components_h>
-        <files>
-          <file category="include" name="cyclone_crypto/"/>
-          
-          <file category="header" name="cyclone_crypto/scep/scep_client.h"/>
-          <file category="header" name="cyclone_crypto/scep/scep_client_operations.h"/>
-          <file category="header" name="cyclone_crypto/scep/scep_client_req_format.h"/>
-          <file category="header" name="cyclone_crypto/scep/scep_client_resp_parse.h"/>
-          <file category="header" name="cyclone_crypto/scep/scep_client_transport.h"/>
-          <file category="header" name="cyclone_crypto/scep/scep_client_misc.h"/>
-          <file category="header" name="cyclone_crypto/scep/scep_common.h"/>
-          <file category="header" name="cyclone_crypto/scep/scep_debug.h"/>
-          
-          <file category="source" name="cyclone_crypto/scep/scep_client.c"/>
-          <file category="source" name="cyclone_crypto/scep/scep_client_operations.c"/>
-          <file category="source" name="cyclone_crypto/scep/scep_client_req_format.c"/>
-          <file category="source" name="cyclone_crypto/scep/scep_client_resp_parse.c"/>
-          <file category="source" name="cyclone_crypto/scep/scep_client_transport.c"/>
-          <file category="source" name="cyclone_crypto/scep/scep_client_misc.c"/>
-          <file category="source" name="cyclone_crypto/scep/scep_common.c"/>
-          <file category="source" name="cyclone_crypto/scep/scep_debug.c"/>
         </files>
       </component>
       
@@ -10577,6 +10750,59 @@
         </files>
       </component>
       
+      <component Cgroup="Hardware" Csub="MCX E247" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP MCX E247 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mcxe247/mcxe247_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxe247/mcxe247_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxe247/mcxe247_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mcxe247/mcxe247_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxe247/mcxe247_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxe247/mcxe247_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="MCX N547" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP MCX N547 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn547/mcxn547_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="MCX N947" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP MCX N947 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mcxn947/mcxn947_crypto_pkc.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Hardware" Csub="i.MX RT1040" condition="CycloneCRYPTO Core Dependencies">
         <description>NXP i.MX RT1040 Cryptographic Accelerator</description>
         <files>
@@ -10668,6 +10894,26 @@
           <file category="source" name="cyclone_crypto/hardware/mimxrt1170/mimxrt1170_crypto_hash.c"/>
           <file category="source" name="cyclone_crypto/hardware/mimxrt1170/mimxrt1170_crypto_cipher.c"/>
           <file category="source" name="cyclone_crypto/hardware/mimxrt1170/mimxrt1170_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="i.MX RT1180" condition="CycloneCRYPTO Core Dependencies">
+        <description>NXP i.MX RT1180 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_config.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_pkc.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/mimxrt1180/mimxrt1180_crypto_pkc.c"/>
         </files>
       </component>
       
@@ -10984,6 +11230,21 @@
           <file category="source" name="cyclone_crypto/hardware/stm32l5xx/stm32l5xx_crypto_hash.c"/>
           <file category="source" name="cyclone_crypto/hardware/stm32l5xx/stm32l5xx_crypto_cipher.c"/>
           <file category="source" name="cyclone_crypto/hardware/stm32l5xx/stm32l5xx_crypto_pkc.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32U0xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32U0 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32u0xx/stm32u0xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32u0xx/stm32u0xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32u0xx/stm32u0xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32u0xx/stm32u0xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32u0xx/stm32u0xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32u0xx/stm32u0xx_crypto_cipher.c"/>
         </files>
       </component>
       
