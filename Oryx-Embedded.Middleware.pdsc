@@ -10,6 +10,22 @@
   
   <!-- Releases section -->
   <releases>
+    <release version="2.6.2" date="2026-04-13">
+      - Added support for DTLS 1.3
+      - Reworked DNS client to allow multiple threads to query the same hostname
+      - Fixed vulnerability in FTP server (buffer overflow)
+      - Fixed vulnerability in PPP implementation (heap overflow)
+      - Fixed vulnerability in IGMP snooping switch (NULL pointer dereferencing)
+      - Fixed IGMP router (wrong message checksum for transmitted Membership Query messages)
+      - Fixed bug in LLDP (incorrect LLDPDU length when a TLV is deleted)
+      - Fixed compilation error in rawSocketSendEthPacket() when trace level is set to TRACE_LEVEL_DEBUG
+      - Fixed improper validation of message length in mqttClientSetWillMessage()
+      - Fixed typo in ENC28J600 driver
+      - Added Ethernet MAC driver for STMicroelectronics STM32C5
+      - Fixed interoperability issue with Dropbear SSH client (CycloneSSH)
+      - Added shellServerSetExitStatus() API to the Shell server (CycloneSSH)
+      - Added support for STM32C5 hardware cryptographic accelerator (TRNG, HASH, CRYP and PKA peripherals)
+    </release>
     <release version="2.6.0" date="2026-02-09">
       - The TCP/IP stack context and the per-interface contexts can be allocated within the user application
       - Added support for SO_BINDTODEVICE option (BSD socket API)
@@ -2245,7 +2261,7 @@
   <components>
     
     <!-- Common Files -->
-    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.6.0">
+    <bundle Cbundle="CycloneCommon" Cclass="CycloneCommon" Cversion="2.6.2">
       <description>Common Files</description>
       <doc></doc>
       
@@ -2468,7 +2484,7 @@
     </bundle>
     
     <!-- CycloneTCP -->
-    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.6.0">
+    <bundle Cbundle="CycloneTCP" Cclass="CycloneTCP" Cversion="2.6.2">
       <description>Dual IPv4/IPv6 Stack</description>
       <doc></doc>
       
@@ -4776,6 +4792,15 @@
         </files>
       </component>
       
+      <component Cgroup="Drivers (MAC)" Csub="STM32C5xx" condition="CycloneTCP Core Dependencies">
+        <description>ST STM32C5 Ethernet MAC controller</description>
+        <files>
+          <file category="include" name="cyclone_tcp/"/>
+          <file category="header" name="cyclone_tcp/drivers/mac/stm32c5xx_eth_driver.h"/>
+          <file category="source" name="cyclone_tcp/drivers/mac/stm32c5xx_eth_driver.c"/>
+        </files>
+      </component>
+      
       <component Cgroup="Drivers (MAC)" Csub="STM32F1xx" condition="CycloneTCP Core Dependencies">
         <description>ST STM32F1 Ethernet MAC controller</description>
         <files>
@@ -6220,7 +6245,7 @@
     </bundle>
     
     <!-- CycloneSSL -->
-    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.6.0">
+    <bundle Cbundle="CycloneSSL" Cclass="CycloneSSL" Cversion="2.6.2">
       <description>TLS/DTLS Library</description>
       <doc></doc>
       
@@ -6232,57 +6257,57 @@
         <files>
           <file category="include" name="cyclone_ssl/"/>
           
-          <file category="header" name="cyclone_ssl/tls.h"/>
-          <file category="header" name="cyclone_ssl/tls_cipher_suites.h"/>
-          <file category="header" name="cyclone_ssl/tls_handshake.h"/>
-          <file category="header" name="cyclone_ssl/tls_common.h"/>
-          <file category="header" name="cyclone_ssl/tls_extensions.h"/>
-          <file category="header" name="cyclone_ssl/tls_certificate.h"/>
-          <file category="header" name="cyclone_ssl/tls_sign_generate.h"/>
-          <file category="header" name="cyclone_ssl/tls_sign_verify.h"/>
-          <file category="header" name="cyclone_ssl/tls_sign_misc.h"/>
-          <file category="header" name="cyclone_ssl/tls_key_material.h"/>
-          <file category="header" name="cyclone_ssl/tls_transcript_hash.h"/>
-          <file category="header" name="cyclone_ssl/tls_cache.h"/>
-          <file category="header" name="cyclone_ssl/tls_ticket.h"/>
-          <file category="header" name="cyclone_ssl/tls_record.h"/>
-          <file category="header" name="cyclone_ssl/tls_record_encrypt.h"/>
-          <file category="header" name="cyclone_ssl/tls_record_decrypt.h"/>
-          <file category="header" name="cyclone_ssl/tls_quic.h"/>
-          <file category="header" name="cyclone_ssl/tls_quic_misc.h"/>
-          <file category="header" name="cyclone_ssl/tls_misc.h"/>
-          <file category="header" name="cyclone_ssl/tls13_common.h"/>
-          <file category="header" name="cyclone_ssl/tls13_sign_generate.h"/>
-          <file category="header" name="cyclone_ssl/tls13_sign_verify.h"/>
-          <file category="header" name="cyclone_ssl/tls13_key_material.h"/>
-          <file category="header" name="cyclone_ssl/tls13_ticket.h"/>
-          <file category="header" name="cyclone_ssl/tls13_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_cipher_suites.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_handshake.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_common.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_certificate.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_sign_generate.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_sign_verify.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_sign_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_key_material.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_transcript_hash.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_cache.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_ticket.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_record.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_record_encrypt.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_record_decrypt.h"/>
+          <file category="header" name="cyclone_ssl/quic/tls_quic.h"/>
+          <file category="header" name="cyclone_ssl/quic/tls_quic_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_common.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_sign_generate.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_sign_verify.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_key_material.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_ticket.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_misc.h"/>
           
-          <file category="source" name="cyclone_ssl/tls.c"/>
-          <file category="source" name="cyclone_ssl/tls_cipher_suites.c"/>
-          <file category="source" name="cyclone_ssl/tls_handshake.c"/>
-          <file category="source" name="cyclone_ssl/tls_common.c"/>
-          <file category="source" name="cyclone_ssl/tls_extensions.c"/>
-          <file category="source" name="cyclone_ssl/tls_certificate.c"/>
-          <file category="source" name="cyclone_ssl/tls_sign_generate.c"/>
-          <file category="source" name="cyclone_ssl/tls_sign_verify.c"/>
-          <file category="source" name="cyclone_ssl/tls_sign_misc.c"/>
-          <file category="source" name="cyclone_ssl/tls_key_material.c"/>
-          <file category="source" name="cyclone_ssl/tls_transcript_hash.c"/>
-          <file category="source" name="cyclone_ssl/tls_cache.c"/>
-          <file category="source" name="cyclone_ssl/tls_ticket.c"/>
-          <file category="source" name="cyclone_ssl/tls_record.c"/>
-          <file category="source" name="cyclone_ssl/tls_record_encrypt.c"/>
-          <file category="source" name="cyclone_ssl/tls_record_decrypt.c"/>
-          <file category="source" name="cyclone_ssl/tls_quic.c"/>
-          <file category="source" name="cyclone_ssl/tls_quic_misc.c"/>
-          <file category="source" name="cyclone_ssl/tls_misc.c"/>
-          <file category="source" name="cyclone_ssl/tls13_common.c"/>
-          <file category="source" name="cyclone_ssl/tls13_sign_generate.c"/>
-          <file category="source" name="cyclone_ssl/tls13_sign_verify.c"/>
-          <file category="source" name="cyclone_ssl/tls13_key_material.c"/>
-          <file category="source" name="cyclone_ssl/tls13_ticket.c"/>
-          <file category="source" name="cyclone_ssl/tls13_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_cipher_suites.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_handshake.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_common.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_certificate.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_sign_generate.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_sign_verify.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_sign_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_key_material.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_transcript_hash.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_cache.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_ticket.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_record.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_record_encrypt.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_record_decrypt.c"/>
+          <file category="source" name="cyclone_ssl/quic/tls_quic.c"/>
+          <file category="source" name="cyclone_ssl/quic/tls_quic_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_common.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_sign_generate.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_sign_verify.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_key_material.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_ticket.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_misc.c"/>
           
           <file category="header" name="config/tls_config.h" attr="config" version="2.6.0"/>
         </files>
@@ -6296,21 +6321,21 @@
         <files>
           <file category="include" name="cyclone_ssl/"/>
           
-          <file category="header" name="cyclone_ssl/tls_client.h"/>
-          <file category="header" name="cyclone_ssl/tls_client_fsm.h"/>
-          <file category="header" name="cyclone_ssl/tls_client_extensions.h"/>
-          <file category="header" name="cyclone_ssl/tls_client_misc.h"/>
-          <file category="header" name="cyclone_ssl/tls13_client.h"/>
-          <file category="header" name="cyclone_ssl/tls13_client_extensions.h"/>
-          <file category="header" name="cyclone_ssl/tls13_client_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client_fsm.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_client.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_client_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_client_misc.h"/>
           
-          <file category="source" name="cyclone_ssl/tls_client.c"/>
-          <file category="source" name="cyclone_ssl/tls_client_fsm.c"/>
-          <file category="source" name="cyclone_ssl/tls_client_extensions.c"/>
-          <file category="source" name="cyclone_ssl/tls_client_misc.c"/>
-          <file category="source" name="cyclone_ssl/tls13_client.c"/>
-          <file category="source" name="cyclone_ssl/tls13_client_extensions.c"/>
-          <file category="source" name="cyclone_ssl/tls13_client_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client_fsm.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_client.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_client_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_client_misc.c"/>
         </files>
       </component>
       
@@ -6322,21 +6347,21 @@
         <files>
           <file category="include" name="cyclone_ssl/"/>
           
-          <file category="header" name="cyclone_ssl/tls_server.h"/>
-          <file category="header" name="cyclone_ssl/tls_server_fsm.h"/>
-          <file category="header" name="cyclone_ssl/tls_server_extensions.h"/>
-          <file category="header" name="cyclone_ssl/tls_server_misc.h"/>
-          <file category="header" name="cyclone_ssl/tls13_server.h"/>
-          <file category="header" name="cyclone_ssl/tls13_server_extensions.h"/>
-          <file category="header" name="cyclone_ssl/tls13_server_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server_fsm.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_server.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_server_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_server_misc.h"/>
           
-          <file category="source" name="cyclone_ssl/tls_server.c"/>
-          <file category="source" name="cyclone_ssl/tls_server_fsm.c"/>
-          <file category="source" name="cyclone_ssl/tls_server_extensions.c"/>
-          <file category="source" name="cyclone_ssl/tls_server_misc.c"/>
-          <file category="source" name="cyclone_ssl/tls13_server.c"/>
-          <file category="source" name="cyclone_ssl/tls13_server_extensions.c"/>
-          <file category="source" name="cyclone_ssl/tls13_server_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server_fsm.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_server.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_server_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_server_misc.c"/>
         </files>
       </component>
       
@@ -6349,19 +6374,31 @@
         <files>
           <file category="include" name="cyclone_ssl/"/>
           
-          <file category="header" name="cyclone_ssl/tls_client.h"/>
-          <file category="header" name="cyclone_ssl/tls_client_fsm.h"/>
-          <file category="header" name="cyclone_ssl/tls_client_extensions.h"/>
-          <file category="header" name="cyclone_ssl/tls_client_misc.h"/>
-          <file category="header" name="cyclone_ssl/dtls_record.h"/>
-          <file category="header" name="cyclone_ssl/dtls_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client_fsm.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_client_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_client.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_client_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_client_misc.h"/>
+          <file category="header" name="cyclone_ssl/dtls/dtls_record.h"/>
+          <file category="header" name="cyclone_ssl/dtls/dtls_misc.h"/>
+          <file category="header" name="cyclone_ssl/dtls13/dtls13_record_encrypt.h"/>
+          <file category="header" name="cyclone_ssl/dtls13/dtls13_record_decrypt.h"/>
+          <file category="header" name="cyclone_ssl/dtls13/dtls13_misc.h"/>
           
-          <file category="source" name="cyclone_ssl/tls_client.c"/>
-          <file category="source" name="cyclone_ssl/tls_client_fsm.c"/>
-          <file category="source" name="cyclone_ssl/tls_client_extensions.c"/>
-          <file category="source" name="cyclone_ssl/tls_client_misc.c"/>
-          <file category="source" name="cyclone_ssl/dtls_record.c"/>
-          <file category="source" name="cyclone_ssl/dtls_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client_fsm.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_client_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_client.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_client_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_client_misc.c"/>
+          <file category="source" name="cyclone_ssl/dtls/dtls_record.c"/>
+          <file category="source" name="cyclone_ssl/dtls/dtls_misc.c"/>
+          <file category="source" name="cyclone_ssl/dtls13/dtls13_record_encrypt.c"/>
+          <file category="source" name="cyclone_ssl/dtls13/dtls13_record_decrypt.c"/>
+          <file category="source" name="cyclone_ssl/dtls13/dtls13_misc.c"/>
         </files>
       </component>
       
@@ -6374,19 +6411,33 @@
         <files>
           <file category="include" name="cyclone_ssl/"/>
           
-          <file category="header" name="cyclone_ssl/tls_server.h"/>
-          <file category="header" name="cyclone_ssl/tls_server_fsm.h"/>
-          <file category="header" name="cyclone_ssl/tls_server_extensions.h"/>
-          <file category="header" name="cyclone_ssl/tls_server_misc.h"/>
-          <file category="header" name="cyclone_ssl/dtls_record.h"/>
-          <file category="header" name="cyclone_ssl/dtls_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server_fsm.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls/tls_server_misc.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_server.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_server_extensions.h"/>
+          <file category="header" name="cyclone_ssl/tls13/tls13_server_misc.h"/>
+          <file category="header" name="cyclone_ssl/dtls/dtls_record.h"/>
+          <file category="header" name="cyclone_ssl/dtls/dtls_misc.h"/>
+          <file category="header" name="cyclone_ssl/dtls13/dtls13_server_extensions.h"/>
+          <file category="header" name="cyclone_ssl/dtls13/dtls13_record_encrypt.h"/>
+          <file category="header" name="cyclone_ssl/dtls13/dtls13_record_decrypt.h"/>
+          <file category="header" name="cyclone_ssl/dtls13/dtls13_misc.h"/>
           
-          <file category="source" name="cyclone_ssl/tls_server.c"/>
-          <file category="source" name="cyclone_ssl/tls_server_fsm.c"/>
-          <file category="source" name="cyclone_ssl/tls_server_extensions.c"/>
-          <file category="source" name="cyclone_ssl/tls_server_misc.c"/>
-          <file category="source" name="cyclone_ssl/dtls_record.c"/>
-          <file category="source" name="cyclone_ssl/dtls_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server_fsm.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls/tls_server_misc.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_server.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_server_extensions.c"/>
+          <file category="source" name="cyclone_ssl/tls13/tls13_server_misc.c"/>
+          <file category="source" name="cyclone_ssl/dtls/dtls_record.c"/>
+          <file category="source" name="cyclone_ssl/dtls/dtls_misc.c"/>
+          <file category="source" name="cyclone_ssl/dtls13/dtls13_server_extensions.c"/>
+          <file category="source" name="cyclone_ssl/dtls13/dtls13_record_encrypt.c"/>
+          <file category="source" name="cyclone_ssl/dtls13/dtls13_record_decrypt.c"/>
+          <file category="source" name="cyclone_ssl/dtls13/dtls13_misc.c"/>
         </files>
       </component>
       
@@ -6785,8 +6836,8 @@
         </RTE_Components_h>
         <files>
         <file category="include" name="cyclone_ssl/"/>
-        <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
-        <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
+        <file category="header" name="cyclone_ssl/tls/tls_ffdhe.h"/>
+        <file category="source" name="cyclone_ssl/tls/tls_ffdhe.c"/>
         </files>
       </component>
       
@@ -6797,8 +6848,8 @@
         </RTE_Components_h>
         <files>
         <file category="include" name="cyclone_ssl/"/>
-        <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
-        <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
+        <file category="header" name="cyclone_ssl/tls/tls_ffdhe.h"/>
+        <file category="source" name="cyclone_ssl/tls/tls_ffdhe.c"/>
         </files>
       </component>
       
@@ -6809,8 +6860,8 @@
         </RTE_Components_h>
         <files>
         <file category="include" name="cyclone_ssl/"/>
-        <file category="header" name="cyclone_ssl/tls_ffdhe.h"/>
-        <file category="source" name="cyclone_ssl/tls_ffdhe.c"/>
+        <file category="header" name="cyclone_ssl/tls/tls_ffdhe.h"/>
+        <file category="source" name="cyclone_ssl/tls/tls_ffdhe.c"/>
         </files>
       </component>
       
@@ -6969,7 +7020,7 @@
     </bundle>
     
     <!-- CycloneSSH -->
-    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.6.0">
+    <bundle Cbundle="CycloneSSH" Cclass="CycloneSSH" Cversion="2.6.2">
       <description>SSH Library</description>
       <doc></doc>
       
@@ -7548,7 +7599,7 @@
     </bundle>
     
     <!-- CycloneIPSEC -->
-    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.6.0">
+    <bundle Cbundle="CycloneIPSEC" Cclass="CycloneIPSEC" Cversion="2.6.2">
       <description>IPsec / IKEv2 Library</description>
       <doc></doc>
       
@@ -8063,7 +8114,7 @@
     </bundle>
     
     <!-- CycloneEAP -->
-    <bundle Cbundle="CycloneEAP" Cclass="CycloneEAP" Cversion="2.6.0">
+    <bundle Cbundle="CycloneEAP" Cclass="CycloneEAP" Cversion="2.6.2">
       <description>802.1X / EAP Library</description>
       <doc></doc>
       
@@ -8194,7 +8245,7 @@
     </bundle>
     
     <!-- CycloneSTP -->
-    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.6.0">
+    <bundle Cbundle="CycloneSTP" Cclass="CycloneSTP" Cversion="2.6.2">
       <description>Spanning Tree Protocol Library</description>
       <doc></doc>
       
@@ -8325,7 +8376,7 @@
     </bundle>
    
    <!-- CycloneACME -->
-    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.6.0">
+    <bundle Cbundle="CycloneACME" Cclass="CycloneACME" Cversion="2.6.2">
       <description>ACME Client Library</description>
       <doc></doc>
       
@@ -8407,7 +8458,7 @@
     </bundle>
    
    <!-- CycloneEST -->
-    <bundle Cbundle="CycloneEST" Cclass="CycloneEST" Cversion="2.6.0">
+    <bundle Cbundle="CycloneEST" Cclass="CycloneEST" Cversion="2.6.2">
       <description>EST Client Library</description>
       <doc></doc>
       
@@ -8448,7 +8499,7 @@
     </bundle>
    
    <!-- CycloneSCEP -->
-    <bundle Cbundle="CycloneSCEP" Cclass="CycloneSCEP" Cversion="2.6.0">
+    <bundle Cbundle="CycloneSCEP" Cclass="CycloneSCEP" Cversion="2.6.2">
       <description>SCEP Client Library</description>
       <doc></doc>
       
@@ -8493,7 +8544,7 @@
     </bundle>
     
     <!-- CycloneCRYPTO -->
-    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.6.0">
+    <bundle Cbundle="CycloneCRYPTO" Cclass="CycloneCRYPTO" Cversion="2.6.2">
       <description>Cryptographic Library</description>
       <doc></doc>
       
@@ -11265,33 +11316,22 @@
         </files>
       </component>
       
-      <component Cgroup="Hardware" Csub="STM32G0xx" condition="CycloneCRYPTO Core Dependencies">
-        <description>ST STM32G0 Cryptographic Accelerator</description>
+      <component Cgroup="Hardware" Csub="STM32C5xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32C5 Cryptographic Accelerator</description>
         <files>
           <file category="include" name="cyclone_crypto/"/>
           
-          <file category="header" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto.h"/>
-          <file category="header" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_trng.h"/>
-          <file category="header" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_hash.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_cipher.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_pkc.h"/>
           
-          <file category="source" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto.c"/>
-          <file category="source" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_trng.c"/>
-          <file category="source" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_cipher.c"/>
-        </files>
-      </component>
-      
-      <component Cgroup="Hardware" Csub="STM32G4xx" condition="CycloneCRYPTO Core Dependencies">
-        <description>ST STM32G4 Cryptographic Accelerator</description>
-        <files>
-          <file category="include" name="cyclone_crypto/"/>
-          
-          <file category="header" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto.h"/>
-          <file category="header" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_trng.h"/>
-          <file category="header" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_cipher.h"/>
-          
-          <file category="source" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto.c"/>
-          <file category="source" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_trng.c"/>
-          <file category="source" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_hash.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_cipher.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32c5xx/stm32c5xx_crypto_pkc.h"/>
         </files>
       </component>
       
@@ -11343,6 +11383,36 @@
           <file category="source" name="cyclone_crypto/hardware/stm32f7xx/stm32f7xx_crypto_trng.c"/>
           <file category="source" name="cyclone_crypto/hardware/stm32f7xx/stm32f7xx_crypto_hash.c"/>
           <file category="source" name="cyclone_crypto/hardware/stm32f7xx/stm32f7xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32G0xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32G0 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32g0xx/stm32g0xx_crypto_cipher.c"/>
+        </files>
+      </component>
+      
+      <component Cgroup="Hardware" Csub="STM32G4xx" condition="CycloneCRYPTO Core Dependencies">
+        <description>ST STM32G4 Cryptographic Accelerator</description>
+        <files>
+          <file category="include" name="cyclone_crypto/"/>
+          
+          <file category="header" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_trng.h"/>
+          <file category="header" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_cipher.h"/>
+          
+          <file category="source" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_trng.c"/>
+          <file category="source" name="cyclone_crypto/hardware/stm32g4xx/stm32g4xx_crypto_cipher.c"/>
         </files>
       </component>
       
